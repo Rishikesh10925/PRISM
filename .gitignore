@@ -31,3 +31,7 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+
+# preprocessing test cache
+.pytest_cache/
+src/preprocessing/tests/__pycache__/
