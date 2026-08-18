@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Data & models (large binary artifacts, not versioned)
+data/raw/*
+data/merged/*
+data/annotations/*
+!data/raw/.gitkeep
+!data/merged/.gitkeep
+!data/annotations/.gitkeep
+models/*.pt
+models/*.pth
+models/*.onnx
+
+# Node / frontend
+node_modules/
+frontend/build/
+frontend/dist/
+
+# Env / secrets
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
