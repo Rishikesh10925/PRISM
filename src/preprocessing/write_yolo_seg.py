@@ -37,10 +37,21 @@ def write_yolo_seg(annotations: list[ImageAnnotation], out_dir: Path) -> None:
         (out_dir / "labels" / f"{stem}.txt").write_text("\n".join(lines), encoding="utf-8")
 
 
-def write_data_yaml(out_dir: Path, path: Path) -> None:
+def write_data_yaml(
+    path: Path,
+    train: str | None = None,
+    val: str | None = None,
+    test: str | None = None,
+) -> None:
+    """train/val/test are paths to the split manifest .txt files written by
+    src/detection/prepare_splits.py (each one line per image path), the format
+    Ultralytics expects when a directory-per-split layout isn't used. Falls back to a
+    generic "images" placeholder for any split not yet known (e.g. right after
+    build_merged_dataset.py, before prepare_splits.py has run)."""
     data = {
-        "path": str(out_dir),
-        "train": "images",  # split manifests (Phase 3) point train/val/test at subsets of this
+        "train": train or "images",
+        "val": val or "images",
+        "test": test or "images",
         "names": {i: name for i, name in enumerate(CLASSES)},
     }
     Path(path).write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")

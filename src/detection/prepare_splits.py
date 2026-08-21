@@ -16,12 +16,15 @@ from __future__ import annotations
 
 import csv
 import random
+import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MERGED_IMAGES_DIR = REPO_ROOT / "data" / "merged" / "images"
 ANNOTATIONS_DIR = REPO_ROOT / "data" / "annotations"
 SPLITS_DIR = REPO_ROOT / "data" / "annotations" / "splits"
+
+sys.path.insert(0, str(REPO_ROOT / "src" / "preprocessing"))
 
 NATIVE_SPLIT_SOURCE_SUFFIXES = {"_training": "train", "_validation": "val", "_testing": "test"}
 
@@ -81,6 +84,15 @@ def build_splits(seed: int = 0, train_frac: float = 0.70, val_frac: float = 0.15
     total = sum(len(v) for v in by_split.values())
     for split, imgs in by_split.items():
         print(f"[prepare_splits] {split}: {len(imgs)} images ({len(imgs) / total:.1%})")
+
+    from write_yolo_seg import write_data_yaml
+
+    write_data_yaml(
+        SPLITS_DIR.parent / "data.yaml",
+        train=str(SPLITS_DIR / "train.txt"),
+        val=str(SPLITS_DIR / "val.txt"),
+        test=str(SPLITS_DIR / "test.txt"),
+    )
 
     return manifest
 

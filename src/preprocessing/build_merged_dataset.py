@@ -72,7 +72,10 @@ def main() -> None:
         ann.image_path = str(dest)
 
     write_yolo_seg(cleaned, ANNOTATIONS_DIR)
-    write_data_yaml(ANNOTATIONS_DIR, ANNOTATIONS_DIR / "data.yaml")
+    # data.yaml gets its real train/val/test manifest paths from
+    # src/detection/prepare_splits.py, which runs after this and knows the splits;
+    # this placeholder just means "not yet split" if someone inspects it in between.
+    write_data_yaml(ANNOTATIONS_DIR / "data.yaml")
 
     sample_for_manual_review(cleaned, MERGED_DIR / "review_sample", fraction=0.12)
 
