@@ -36,3 +36,4 @@ Thumbs.db
 .pytest_cache/
 src/preprocessing/tests/__pycache__/
 data/merged/review_sample/overlays/*.jpg
+src/detection/tests/__pycache__/

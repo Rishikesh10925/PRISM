@@ -1,0 +1,10 @@
+ultralytics>=8.3.0
+torch>=2.6.0
+torchvision>=0.21.0
+albumentations>=1.4.0
+pyyaml>=6.0
+pytest>=8.0.0
+
+# torch/torchvision above are CPU wheels by default. For GPU training install the CUDA
+# build matching your driver instead, e.g. (see `nvidia-smi` for your CUDA version):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
