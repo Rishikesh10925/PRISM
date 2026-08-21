@@ -35,3 +35,4 @@ Thumbs.db
 # preprocessing test cache
 .pytest_cache/
 src/preprocessing/tests/__pycache__/
+data/merged/review_sample/overlays/*.jpg
