@@ -26,7 +26,12 @@ def _data_yaml_with_train_override(train_manifest: str | None) -> Path:
     if train_manifest is None:
         return DATA_YAML
     data = yaml.safe_load(DATA_YAML.read_text(encoding="utf-8"))
-    data["train"] = train_manifest
+    # Ultralytics resolves a relative train/val path against the yaml file's own
+    # directory (data/annotations/), not the cwd -- write an absolute path so a
+    # manifest passed relative to the repo root (e.g. "data/annotations/splits/
+    # train_augmented.txt") doesn't get that prefix doubled.
+    manifest_path = Path(train_manifest)
+    data["train"] = str(manifest_path if manifest_path.is_absolute() else (REPO_ROOT / manifest_path).resolve())
     override_path = DATA_YAML.with_name("data.aug_override.yaml")
     override_path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
     return override_path
