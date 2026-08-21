@@ -4,6 +4,9 @@ torchvision>=0.21.0
 albumentations>=1.4.0
 pyyaml>=6.0
 pytest>=8.0.0
+torchmetrics>=1.4.0
+pycocotools>=2.0.7
+opencv-python-headless>=4.9.0
 
 # torch/torchvision above are CPU wheels by default. For GPU training install the CUDA
 # build matching your driver instead, e.g. (see `nvidia-smi` for your CUDA version):
