@@ -18,7 +18,9 @@ EVAL_DIR = REPO_ROOT / "evaluation"
 
 def evaluate(weights_path: str, split: str = "test", out_csv: str | None = None) -> dict:
     model = YOLO(weights_path)
-    metrics = model.val(data=str(DATA_YAML), split=split)
+    metrics = model.val(
+        data=str(DATA_YAML), split=split, project=str(REPO_ROOT / "models" / "runs"), name=f"eval_{split}"
+    )
 
     box = metrics.box
     seg = metrics.seg

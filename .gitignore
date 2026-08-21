@@ -15,6 +15,9 @@ data/annotations/*
 models/*.pt
 models/*.pth
 models/*.onnx
+models/runs/
+# ultralytics downloads pretrained weights (yolov8n-seg.pt etc.) to the repo root on first use
+/*.pt
 
 # Node / frontend
 node_modules/
