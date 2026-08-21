@@ -61,9 +61,14 @@ def main() -> None:
     MERGED_DIR.mkdir(parents=True, exist_ok=True)
     (MERGED_DIR / "images").mkdir(exist_ok=True)
     for ann in cleaned:
-        dest = MERGED_DIR / "images" / Path(ann.image_path).name
+        # Prefix with source: several sources (e.g. Pothole-600's training/validation/
+        # testing folders) reuse the same bare filenames like 0000.png, and a flat
+        # merge without this prefix silently collides them (one image's pixels ending
+        # up paired with a different image's label file).
+        original = Path(ann.image_path)
+        dest = MERGED_DIR / "images" / f"{ann.source}_{original.name}"
         if not dest.exists():
-            shutil.copy2(ann.image_path, dest)
+            shutil.copy2(original, dest)
         ann.image_path = str(dest)
 
     write_yolo_seg(cleaned, ANNOTATIONS_DIR)
