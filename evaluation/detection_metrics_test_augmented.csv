@@ -1,0 +1,7 @@
+class,box_precision,box_recall,box_map50,box_map50_95,mask_map50,mask_map50_95
+pothole,0.9007187749691594,0.8247689869118965,0.8905038544762698,0.5162274093726497,0.8555167798665048,0.5063321450441656
+crack_longitudinal,nan,nan,nan,nan,nan,nan
+crack_transverse,nan,nan,nan,nan,nan,nan
+crack_alligator,nan,nan,nan,nan,nan,nan
+road_surface,nan,nan,nan,nan,nan,nan
+footpath,nan,nan,nan,nan,nan,nan
