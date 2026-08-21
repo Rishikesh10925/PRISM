@@ -8,6 +8,11 @@ This is deliberately offline (write augmented images to disk once) rather than a
 on-the-fly Ultralytics hook: it's simple to test, inspect, and — for the Phase 6
 augmentation ablation — trivial to toggle by pointing training at train.txt vs
 train_augmented.txt.
+
+Augmented copies are written into data/merged/images/ (not a separate folder) with
+their labels into data/merged/labels/, matching the originals: Ultralytics finds an
+image's label by swapping the images/ path segment for labels/, which only works when
+both live under the same parent directory.
 """
 
 from __future__ import annotations
@@ -22,7 +27,9 @@ from augmentations import build_train_augmentations
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ANNOTATIONS_DIR = REPO_ROOT / "data" / "annotations"
 SPLITS_DIR = ANNOTATIONS_DIR / "splits"
-AUG_IMAGES_DIR = REPO_ROOT / "data" / "merged" / "images_aug"
+MERGED_DIR = REPO_ROOT / "data" / "merged"
+AUG_IMAGES_DIR = MERGED_DIR / "images"
+AUG_LABELS_DIR = MERGED_DIR / "labels"
 
 
 def augment_train_split(copies_per_image: int = 1, seed: int = 0) -> list[str]:
@@ -40,7 +47,7 @@ def augment_train_split(copies_per_image: int = 1, seed: int = 0) -> list[str]:
         img = cv2.imread(str(img_path))
         if img is None:
             continue
-        label_path = ANNOTATIONS_DIR / "labels" / f"{img_path.stem}.txt"
+        label_path = AUG_LABELS_DIR / f"{img_path.stem}.txt"
 
         for copy_idx in range(copies_per_image):
             out = pipeline(image=img)["image"]
@@ -49,7 +56,7 @@ def augment_train_split(copies_per_image: int = 1, seed: int = 0) -> list[str]:
             cv2.imwrite(str(aug_path), out)
 
             if label_path.exists():
-                shutil.copy2(label_path, ANNOTATIONS_DIR / "labels" / f"{aug_name.rsplit('.', 1)[0]}.txt")
+                shutil.copy2(label_path, AUG_LABELS_DIR / f"{aug_name.rsplit('.', 1)[0]}.txt")
 
             augmented_paths.append(str(aug_path))
 

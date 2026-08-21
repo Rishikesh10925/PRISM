@@ -71,7 +71,11 @@ def main() -> None:
             shutil.copy2(original, dest)
         ann.image_path = str(dest)
 
-    write_yolo_seg(cleaned, ANNOTATIONS_DIR)
+    # Labels go in data/merged/labels/, a sibling of data/merged/images/ — Ultralytics
+    # locates an image's label by textually swapping "/images/" for "/labels/" in its
+    # path, so the two must live side by side under the same parent (data/annotations/
+    # holds the split manifests and data.yaml instead, see prepare_splits.py).
+    write_yolo_seg(cleaned, MERGED_DIR)
     # data.yaml gets its real train/val/test manifest paths from
     # src/detection/prepare_splits.py, which runs after this and knows the splits;
     # this placeholder just means "not yet split" if someone inspects it in between.
