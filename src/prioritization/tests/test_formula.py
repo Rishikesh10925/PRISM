@@ -1,7 +1,7 @@
 import pytest
 
 from formula import priority_score, rank_potholes
-from schema import PriorityInputs, PriorityWeights
+from priority_schema import PriorityInputs, PriorityWeights
 
 
 def test_priority_score_all_max_inputs_gives_100():

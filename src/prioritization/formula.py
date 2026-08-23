@@ -15,7 +15,7 @@ renormalizing the others by hand.
 
 from __future__ import annotations
 
-from schema import PriorityInputs, PriorityWeights
+from priority_schema import PriorityInputs, PriorityWeights
 
 
 def priority_score(inputs: PriorityInputs, weights: PriorityWeights | None = None) -> float:
