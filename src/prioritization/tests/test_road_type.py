@@ -1,4 +1,20 @@
+import time
+
 from road_type import highway_tag_to_weight, query_nearest_highway_tag, road_type_weight
+
+
+def _query_with_retries(lat, lon, radius_m=50, timeout=20, attempts=3, backoff_s=5):
+    """Overpass's public instance is fair-use rate-limited and occasionally returns an
+    empty result under back-to-back test-suite load rather than a clear error -- retry
+    with backoff instead of treating a transient empty response as this module's bug."""
+    tag = None
+    for attempt in range(attempts):
+        tag = query_nearest_highway_tag(lat, lon, radius_m=radius_m, timeout=timeout)
+        if tag is not None:
+            return tag
+        if attempt < attempts - 1:
+            time.sleep(backoff_s)
+    return tag
 
 
 def test_highway_tag_to_weight_known_tags():
@@ -17,7 +33,7 @@ def test_highway_tag_to_weight_unmapped_and_none_fall_back_to_default():
 
 def test_query_nearest_highway_tag_real_overpass_call():
     # 7th Avenue / West 45th St, Manhattan -- real, stable OSM-tagged secondary roads
-    tag = query_nearest_highway_tag(40.7580, -73.9855, radius_m=50, timeout=20)
+    tag = _query_with_retries(40.7580, -73.9855)
 
     assert tag is not None
     assert highway_tag_to_weight(tag) in (1.0, 0.7, 0.4)
