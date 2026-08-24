@@ -37,15 +37,23 @@ def _priority(path: Path, source: str) -> tuple:
     return (SOURCE_PRIORITY.get(source, 99), -resolution, str(path))
 
 
-def find_duplicate_clusters(image_paths: list[tuple[Path, str]]) -> list[list[tuple[Path, str]]]:
-    """image_paths: list of (path, source_name). Returns clusters of size >= 2."""
+def find_duplicate_clusters(
+    image_paths: list[tuple[Path, str]]
+) -> tuple[list[list[tuple[Path, str]]], set[Path]]:
+    """image_paths: list of (path, source_name). Returns (clusters of size >= 2,
+    unreadable_paths) -- unreadable_paths is every path that failed to open at all
+    (missing/corrupt file), which the caller must exclude from survivors, not just from
+    clustering, or a broken path silently passes through as if it were a valid unique
+    image (it isn't in any cluster's "dropped" set either, since it was never hashed)."""
     hashes: list[tuple[Path, str, imagehash.ImageHash]] = []
+    unreadable: set[Path] = set()
     for path, source in image_paths:
         try:
             with Image.open(path) as im:
                 hashes.append((path, source, imagehash.phash(im)))
         except Exception as exc:  # corrupt/unreadable image — surfaced, not silently dropped
             print(f"[dedup] could not hash {path}: {exc}")
+            unreadable.add(path)
 
     clusters: list[list[tuple[Path, str]]] = []
     assigned: set[int] = set()
@@ -64,15 +72,15 @@ def find_duplicate_clusters(image_paths: list[tuple[Path, str]]) -> list[list[tu
         if len(cluster) > 1:
             clusters.append(cluster)
 
-    return clusters
+    return clusters, unreadable
 
 
 def deduplicate(image_paths: list[tuple[Path, str]], report_csv: Path) -> list[tuple[Path, str]]:
     """Returns the survivor list (one per near-duplicate cluster, all unique images kept
     as-is) and writes a CSV report of every dropped image and which survivor replaced it."""
-    clusters = find_duplicate_clusters(image_paths)
-    dropped: set[Path] = set()
-    rows = []
+    clusters, unreadable = find_duplicate_clusters(image_paths)
+    dropped: set[Path] = set(unreadable)
+    rows = [{"dropped_path": str(p), "dropped_source": "", "kept_path": "", "kept_source": "UNREADABLE"} for p in unreadable]
 
     for cluster in clusters:
         survivor_path, survivor_source = min(cluster, key=lambda ps: _priority(*ps))

@@ -37,3 +37,26 @@ def test_deduplicate_keeps_one_per_cluster_and_prefers_priority_source(tmp_path:
 
     report_text = (tmp_path / "report.csv").read_text(encoding="utf-8")
     assert "a.jpg" in report_text and "b.jpg" in report_text
+
+
+def test_deduplicate_excludes_unreadable_paths_from_survivors(tmp_path: Path):
+    # regression test: a path that fails to open (missing file, or -- as happened with
+    # the real kaggle_severity_levels source -- a VOC XML <filename> that doesn't match
+    # what's actually on disk) must never end up in the survivor list. It was never
+    # added to any duplicate cluster, so the old code let it pass through untouched,
+    # and a downstream shutil.copy2() on that path crashed the whole merge.
+    real = tmp_path / "real.jpg"
+    _save_noise_image(real, seed=1)
+    missing = tmp_path / "does_not_exist.jpg"
+
+    image_paths = [(real, "kaggle_severity_levels"), (missing, "kaggle_severity_levels")]
+
+    survivors = deduplicate(image_paths, report_csv=tmp_path / "report.csv")
+    survivor_paths = {p for p, _ in survivors}
+
+    assert real in survivor_paths
+    assert missing not in survivor_paths
+
+    report_text = (tmp_path / "report.csv").read_text(encoding="utf-8")
+    assert "does_not_exist.jpg" in report_text
+    assert "UNREADABLE" in report_text
