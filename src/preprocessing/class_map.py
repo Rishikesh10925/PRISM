@@ -37,6 +37,33 @@ SOURCE_LABEL_MAPS = {
     "roboflow_pothole": {
         "pothole": "pothole",
     },
+    "kaggle_annotated_potholes": {
+        # chitholian/annotated-potholes-dataset (VOC XML, box-only)
+        "pothole": "pothole",
+    },
+    "kaggle_potholes_yolov8": {
+        # anggadwisunarto/potholes-detection-yolov8 (YOLO box, single class nc=1)
+        "pothole": "pothole",
+    },
+    "kaggle_severity_levels": {
+        # idanbaru/annotated-potholes-with-severity-levels (VOC XML, box-only).
+        # For DETECTION purposes all three severity tiers are just "pothole" -- the
+        # severity labels themselves are used separately, see
+        # src/severity/kaggle_severity_dataset.py, not through this class map.
+        "minor_pothole": "pothole",
+        "medium_pothole": "pothole",
+        "major_pothole": "pothole",
+    },
+    "kaggle_indian_roads": {
+        # mitangshu11/indian-roads-dataset (YOLO box, 3 classes). Class-ID-to-name order
+        # isn't documented in the archive (no data.yaml); confirmed empirically by
+        # rendering sample boxes and visually inspecting them -- see
+        # docs/phase2/03_kaggle_indian_roads_class_mapping.md. Only the pothole class is
+        # mapped in; speed_breaker/unpaved_road have no equivalent in our class set yet.
+        "speed_breaker": None,
+        "pothole": "pothole",
+        "unpaved_road": None,
+    },
 }
 
 
