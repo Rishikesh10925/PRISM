@@ -54,31 +54,32 @@ def convert_boxes_to_masks(
     dropped = 0
 
     for ann in annotations:
+        needs_mask_instances = [inst for inst in ann.instances if inst.needs_mask]
+        if not needs_mask_instances:
+            results.append(ann)
+            continue
+
         image = cv2.imread(ann.image_path)
         if image is None:
             results.append(ann)
             continue
 
-        new_instances: list[Instance] = []
-        for inst in ann.instances:
-            if not inst.needs_mask:
-                new_instances.append(inst)
-                continue
-
+        # One SAM call per IMAGE with every box at once -- SAM's image encoder (the
+        # expensive part) runs once per image regardless of how many boxes are passed,
+        # so batching here instead of one sam() call per instance is a large speedup
+        # whenever an image has more than one box-only instance.
+        boxes = []
+        for inst in needs_mask_instances:
             xs = [p[0] for p in inst.polygon]
             ys = [p[1] for p in inst.polygon]
-            box = [min(xs), min(ys), max(xs), max(ys)]
+            boxes.append([min(xs), min(ys), max(xs), max(ys)])
 
-            sam_result = sam(image, bboxes=[box], verbose=False)
-            mask_data = sam_result[0].masks
-            if mask_data is None or len(mask_data.data) == 0:
-                dropped += 1
-                manifest_rows.append(
-                    {"image": ann.image_path, "source": ann.source, "class": inst.class_name, "sam_generated": "FAILED"}
-                )
-                continue
+        sam_result = sam(image, bboxes=boxes, verbose=False)
+        mask_data = sam_result[0].masks
+        masks = mask_data.data.cpu().numpy() if mask_data is not None else []
 
-            mask = mask_data.data[0].cpu().numpy()
+        new_instances: list[Instance] = [inst for inst in ann.instances if not inst.needs_mask]
+        for inst, mask in zip(needs_mask_instances, masks):
             polygon = _largest_polygon_from_mask(mask)
             if polygon is None:
                 dropped += 1
@@ -90,6 +91,12 @@ def convert_boxes_to_masks(
             new_instances.append(Instance(class_name=inst.class_name, polygon=polygon, needs_mask=False))
             manifest_rows.append(
                 {"image": ann.image_path, "source": ann.source, "class": inst.class_name, "sam_generated": "TRUE"}
+            )
+
+        for _ in range(len(needs_mask_instances) - len(masks)):
+            dropped += 1
+            manifest_rows.append(
+                {"image": ann.image_path, "source": ann.source, "class": "unknown", "sam_generated": "FAILED"}
             )
 
         results.append(

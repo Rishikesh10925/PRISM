@@ -57,6 +57,33 @@ def test_convert_boxes_to_masks_recovers_a_reasonable_mask_from_a_real_box(tmp_p
     assert (tmp_path / "manifest.csv").exists()
 
 
+@pytest.mark.skipif(not SAMPLE_IMAGE.exists(), reason="real Pothole-600 sample not present in data/merged/")
+def test_convert_boxes_to_masks_batches_multiple_boxes_per_image(tmp_path):
+    image = cv2.imread(str(SAMPLE_IMAGE))
+    assert image is not None
+    _, box = _real_mask_and_box(image.shape)
+
+    # two box-only instances on the SAME image -- exercises the batched sam() call
+    # (one image encoder pass, two mask prompts) rather than the single-box path
+    second_box = [box[0] + 5, box[1] + 5, min(box[2] + 5, image.shape[1] - 1), min(box[3] + 5, image.shape[0] - 1)]
+    ann = ImageAnnotation(
+        image_path=str(SAMPLE_IMAGE),
+        width=image.shape[1],
+        height=image.shape[0],
+        source="test",
+        instances=[
+            Instance(class_name="pothole", polygon=box_to_polygon(*box), needs_mask=True),
+            Instance(class_name="pothole", polygon=box_to_polygon(*second_box), needs_mask=True),
+        ],
+    )
+
+    results = convert_boxes_to_masks([ann], manifest_csv=tmp_path / "manifest.csv")
+
+    assert len(results[0].instances) == 2
+    assert all(not inst.needs_mask for inst in results[0].instances)
+    assert all(len(inst.polygon) >= 3 for inst in results[0].instances)
+
+
 def test_convert_boxes_to_masks_leaves_real_masks_untouched(tmp_path):
     ann = ImageAnnotation(
         image_path="doesnt_matter.png",

@@ -12,8 +12,11 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+from box_to_mask_sam import convert_boxes_to_masks
 from clean_annotations import auto_clean, sample_for_manual_review
 from convert_pothole600 import convert_pothole600_split
+from convert_voc import convert_voc_dir
+from convert_yolo_box import convert_yolo_box_dir
 from dedup import deduplicate
 from schema import ImageAnnotation
 from write_yolo_seg import write_data_yaml, write_yolo_seg
@@ -38,8 +41,52 @@ def collect_all_annotations() -> list[ImageAnnotation]:
                 annotations.extend(anns)
                 print(f"[build_merged_dataset] pothole600/{split}: {len(anns)} images")
 
-    # Additional sources (RDD2022, Roboflow, Indian Roads) plug in here the same way
-    # once they're downloaded — see docs/phase2/01_dataset_download_status.md.
+    # kaggle_annotated_potholes (D2): images + VOC XML together in one folder
+    d2_dir = RAW_DIR / "kaggle_annotated_potholes" / "annotated-images"
+    if d2_dir.exists():
+        anns = convert_voc_dir(d2_dir, d2_dir, source="kaggle_annotated_potholes")
+        annotations.extend(anns)
+        print(f"[build_merged_dataset] kaggle_annotated_potholes: {len(anns)} images")
+
+    # kaggle_potholes_yolov8 (D3): its own train/valid folders, merged into one pool
+    # (not treated as a leakage-sensitive native split like Pothole-600's video frames —
+    # these are independently curated stills, not sequential frames)
+    d3_dir = RAW_DIR / "kaggle_potholes_yolov8"
+    if d3_dir.exists():
+        for split in ("train", "valid"):
+            split_dir = d3_dir / split
+            if (split_dir / "images").exists():
+                anns = convert_yolo_box_dir(
+                    split_dir / "images", split_dir / "labels", source="kaggle_potholes_yolov8", source_classes=["pothole"]
+                )
+                annotations.extend(anns)
+                print(f"[build_merged_dataset] kaggle_potholes_yolov8/{split}: {len(anns)} images")
+
+    # kaggle_severity_levels: images + VOC XML in separate folders; severity labels
+    # (minor/medium/major) all map to "pothole" for detection purposes here -- the
+    # severity values themselves are used separately by src/severity/, not through this
+    # detection-training pipeline.
+    severity_dir = RAW_DIR / "kaggle_severity_levels"
+    if (severity_dir / "images").exists():
+        anns = convert_voc_dir(severity_dir / "images", severity_dir / "annotations", source="kaggle_severity_levels")
+        annotations.extend(anns)
+        print(f"[build_merged_dataset] kaggle_severity_levels: {len(anns)} images")
+
+    # kaggle_indian_roads: flat folder, images + YOLO txt together, 3 classes (only
+    # "pothole" mapped in -- see docs/phase2/03_kaggle_indian_roads_class_mapping.md)
+    indian_roads_dir = RAW_DIR / "kaggle_indian_roads" / "Dataset3Class"
+    if indian_roads_dir.exists():
+        anns = convert_yolo_box_dir(
+            indian_roads_dir,
+            indian_roads_dir,
+            source="kaggle_indian_roads",
+            source_classes=["speed_breaker", "pothole", "unpaved_road"],
+        )
+        annotations.extend(anns)
+        print(f"[build_merged_dataset] kaggle_indian_roads: {len(anns)} images")
+
+    # RDD2022 and Roboflow Universe remain blocked -- see
+    # docs/phase2/01_dataset_download_status.md. Plug in the same way once downloaded.
 
     return annotations
 
@@ -52,6 +99,11 @@ def main() -> None:
 
     cleaned, dropped = auto_clean(annotations)
     print(f"[build_merged_dataset] auto_clean dropped {dropped} degenerate instances")
+
+    needs_mask_count = sum(1 for a in cleaned for inst in a.instances if inst.needs_mask)
+    if needs_mask_count:
+        print(f"[build_merged_dataset] running SAM on {needs_mask_count} box-only instances...")
+        cleaned = convert_boxes_to_masks(cleaned, manifest_csv=MERGED_DIR / "sam_conversion_manifest.csv")
 
     image_paths = [(Path(a.image_path), a.source) for a in cleaned]
     survivors = deduplicate(image_paths, report_csv=MERGED_DIR / "dedup_report.csv")
