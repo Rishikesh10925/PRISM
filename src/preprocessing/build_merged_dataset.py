@@ -9,6 +9,7 @@ new source; already-processed sources are simply re-converted, it's idempotent.
 
 from __future__ import annotations
 
+import random
 import shutil
 from pathlib import Path
 
@@ -27,7 +28,18 @@ MERGED_DIR = REPO_ROOT / "data" / "merged"
 ANNOTATIONS_DIR = REPO_ROOT / "data" / "annotations"
 
 
-def collect_all_annotations() -> list[ImageAnnotation]:
+def _subsample(anns: list[ImageAnnotation], max_count: int | None, seed: int = 0) -> list[ImageAnnotation]:
+    """Box-only sources need a slow SAM pass (see box_to_mask_sam.py) before they're
+    usable for training -- at ~2s/image, running all ~7800 box-only images downloaded
+    this round would take hours. max_count caps each new source to a random subsample
+    (seeded, so it's reproducible) for a faster first integration pass; pass
+    max_per_new_source=None to process everything on a later, longer run."""
+    if max_count is None or len(anns) <= max_count:
+        return anns
+    return random.Random(seed).sample(anns, max_count)
+
+
+def collect_all_annotations(max_per_new_source: int | None = 500) -> list[ImageAnnotation]:
     annotations: list[ImageAnnotation] = []
 
     pothole600_dir = RAW_DIR / "pothole600"
@@ -44,7 +56,7 @@ def collect_all_annotations() -> list[ImageAnnotation]:
     # kaggle_annotated_potholes (D2): images + VOC XML together in one folder
     d2_dir = RAW_DIR / "kaggle_annotated_potholes" / "annotated-images"
     if d2_dir.exists():
-        anns = convert_voc_dir(d2_dir, d2_dir, source="kaggle_annotated_potholes")
+        anns = _subsample(convert_voc_dir(d2_dir, d2_dir, source="kaggle_annotated_potholes"), max_per_new_source)
         annotations.extend(anns)
         print(f"[build_merged_dataset] kaggle_annotated_potholes: {len(anns)} images")
 
@@ -53,14 +65,18 @@ def collect_all_annotations() -> list[ImageAnnotation]:
     # these are independently curated stills, not sequential frames)
     d3_dir = RAW_DIR / "kaggle_potholes_yolov8"
     if d3_dir.exists():
+        d3_anns: list[ImageAnnotation] = []
         for split in ("train", "valid"):
             split_dir = d3_dir / split
             if (split_dir / "images").exists():
-                anns = convert_yolo_box_dir(
-                    split_dir / "images", split_dir / "labels", source="kaggle_potholes_yolov8", source_classes=["pothole"]
+                d3_anns.extend(
+                    convert_yolo_box_dir(
+                        split_dir / "images", split_dir / "labels", source="kaggle_potholes_yolov8", source_classes=["pothole"]
+                    )
                 )
-                annotations.extend(anns)
-                print(f"[build_merged_dataset] kaggle_potholes_yolov8/{split}: {len(anns)} images")
+        d3_anns = _subsample(d3_anns, max_per_new_source)
+        annotations.extend(d3_anns)
+        print(f"[build_merged_dataset] kaggle_potholes_yolov8: {len(d3_anns)} images")
 
     # kaggle_severity_levels: images + VOC XML in separate folders; severity labels
     # (minor/medium/major) all map to "pothole" for detection purposes here -- the
@@ -68,7 +84,10 @@ def collect_all_annotations() -> list[ImageAnnotation]:
     # detection-training pipeline.
     severity_dir = RAW_DIR / "kaggle_severity_levels"
     if (severity_dir / "images").exists():
-        anns = convert_voc_dir(severity_dir / "images", severity_dir / "annotations", source="kaggle_severity_levels")
+        anns = _subsample(
+            convert_voc_dir(severity_dir / "images", severity_dir / "annotations", source="kaggle_severity_levels"),
+            max_per_new_source,
+        )
         annotations.extend(anns)
         print(f"[build_merged_dataset] kaggle_severity_levels: {len(anns)} images")
 
@@ -76,12 +95,17 @@ def collect_all_annotations() -> list[ImageAnnotation]:
     # "pothole" mapped in -- see docs/phase2/03_kaggle_indian_roads_class_mapping.md)
     indian_roads_dir = RAW_DIR / "kaggle_indian_roads" / "Dataset3Class"
     if indian_roads_dir.exists():
-        anns = convert_yolo_box_dir(
+        indian_roads_anns = convert_yolo_box_dir(
             indian_roads_dir,
             indian_roads_dir,
             source="kaggle_indian_roads",
             source_classes=["speed_breaker", "pothole", "unpaved_road"],
         )
+        # most images here also contain speed_breaker/unpaved_road boxes, which are
+        # dropped (unmapped) -- filter to images with a mapped instance left BEFORE
+        # subsampling, or a chunk of the subsample would be wasted on empty images
+        indian_roads_anns = [a for a in indian_roads_anns if a.instances]
+        anns = _subsample(indian_roads_anns, max_per_new_source)
         annotations.extend(anns)
         print(f"[build_merged_dataset] kaggle_indian_roads: {len(anns)} images")
 
