@@ -21,12 +21,22 @@ src/
   prioritization/        priority scoring engine
   utils/                 shared helpers
 models/                trained weights (not versioned)
-backend/               FastAPI service
-frontend/              React + Leaflet dashboard
+backend/               FastAPI service (planned, not yet built)
+frontend/              React + Leaflet dashboard (planned, not yet built)
+demo/                  local Streamlit demo dashboard (real pipeline, presentation use only — see demo/README.md)
 evaluation/            detection / severity / prioritization metric scripts
 paper/                 paper source and figures
 ```
 
 ## Status
 
-Phase 1 (literature review & planning) in progress — see [docs/phase1/](docs/phase1/).
+- **Phase 1** (literature review & planning) — done, see [docs/phase1/](docs/phase1/).
+- **Phase 2** (dataset preparation) — partial, see [docs/phase2/](docs/phase2/). Pothole-600 plus four Kaggle
+  sources are downloaded and converted; RDD2022 and Roboflow Universe remain access-blocked; the severity
+  validation subset (human ratings) hasn't been built yet.
+- **Phase 3** (detection model) — done, see [docs/phase3/](docs/phase3/). YOLOv8n-seg and a Mask R-CNN
+  baseline are both trained and evaluated.
+- **Phase 4** (severity & prioritization modules) — done except fusion-weight calibration (blocked on the
+  Phase 2 human-ratings gap), see [docs/phase4/](docs/phase4/).
+- **Phase 5** (application integration: backend/frontend/database) — not started. [demo/](demo/) is a
+  temporary local dashboard for presenting the working pipeline in the meantime.
