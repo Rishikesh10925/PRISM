@@ -36,10 +36,10 @@ def build_report() -> str:
     lines.append(
         "Numbers below are read directly from `evaluation/*.csv`, produced by "
         "`evaluate_yolo.py` and `evaluate_maskrcnn.py` on the held-out test split. "
-        "See [docs/phase2/01_dataset_download_status.md](../phase2/01_dataset_download_status.md) "
-        "for why this test set is Pothole-600 only (582 images, single class) rather than the "
-        "full multi-source merge the blueprint scoped — RDD2022/Roboflow/Kaggle downloads are "
-        "blocked in this environment pending manual/account-based access."
+        "**If YOLOv8n-seg and Mask R-CNN were last evaluated on different dataset versions "
+        "(check each evaluation run's log/date), don't read this as a fair head-to-head — "
+        "re-run both on the same current merged dataset first, or add a manual caveat section "
+        "like the one in git history for the Pothole-600-only vs multi-source transition.**"
     )
     lines.append("")
 
