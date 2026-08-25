@@ -32,12 +32,34 @@ Opens at `http://localhost:8501`. Requires a trained checkpoint at
 5. α/β/γ/δ priority weight sliders re-rank instantly — the expensive detection/MiDaS
    step is cached per image, so only the fast formula recomputes on slider movement.
 
+## Who sees what
+
+The main screen is built for a non-technical viewer — a citizen or an authority
+official, not a developer. Per pothole it shows a **Severity Score (0–100)** with a
+plain level (Very Low/Low/Medium/High/Critical), a **Repair Priority Score (0–100)**
+with a plain level (Less Important/Moderate/Important/Very Important), a one-line
+recommended action, and four plain-language factors (Pothole Severity, Road Importance,
+Traffic Level, Previous Reports) instead of raw weights or model internals.
+
+All the underlying technical numbers (area ratio, MiDaS depth value, contour
+irregularity, detection confidence, the raw OSM road-type weight, the actual α/β/γ/δ
+weights) are still there, just tucked into a collapsed **"🔧 Admin / developer
+details"** section per result card, plus an **"⚙️ Admin / developer details"** section
+in the sidebar for adjusting the priority weights or overriding the location manually.
+See [docs/phase5/01_demo_ui_notes.md](../docs/phase5/01_demo_ui_notes.md) for exactly
+what changed and why — the detection/severity/priority calculation logic itself is
+untouched, only what's displayed by default.
+
+Location and time are auto-detected where a genuine automatic source exists (the
+system clock for time; real browser geolocation, with a documented fallback location if
+denied/unavailable, for GPS) — "Previous Reports" defaults to "None" rather than
+fabricating a number, since there's no live citizen-report database yet (Phase 5).
+
 ## Verified working
 
 Manually QA'd via browser automation on 2026-08-25: page loads with zero console
-errors, a real sample image runs through the full pipeline (detection mask overlay +
-severity sub-scores + priority score all render correctly), and moving the severity
-slider to its maximum changed the displayed Priority Score from 22.2 to 15.9 — which
-matches `formula.priority_score()`'s output for that exact weight change by hand
-calculation, confirming the live re-rank is wired correctly, not just visually
-plausible.
+errors, a real sample image runs through the full pipeline (detection mask overlay,
+plain-language result card, and the Admin details expander all render correctly), and
+the displayed severity/priority levels were checked against their score thresholds
+(e.g. a 10/100 severity score correctly shows "Very Low", a 24/100 priority score
+correctly shows "Less Important").
