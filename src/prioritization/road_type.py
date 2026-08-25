@@ -72,3 +72,17 @@ def road_type_weight(lat: float, lon: float, radius_m: int = 50) -> float:
     where a hard failure would be preferable to a silent default."""
     tag = query_nearest_highway_tag(lat, lon, radius_m)
     return highway_tag_to_weight(tag)
+
+
+def road_importance_label(weight: float) -> str:
+    """Plain-language label for the demo UI's "Road Importance" row -- display layer
+    only, does not change the numeric weight used in the priority formula. Bands are
+    wide enough that all three of today's real weight values (1.0/0.7/0.4) land
+    distinctly; "Very Low" is reachable for a future finer-grained weight table."""
+    if weight < 0.3:
+        return "Very Low"
+    if weight < 0.55:
+        return "Low"
+    if weight < 0.85:
+        return "Medium"
+    return "High"

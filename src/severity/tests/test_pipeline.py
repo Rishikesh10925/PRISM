@@ -29,7 +29,7 @@ def test_compute_severity_with_shadow_fallback_no_midas():
     score, category, cues = compute_severity(image, mask, use_midas=False)
 
     assert 0.0 <= score <= 100.0
-    assert category in ("Low", "Medium", "High", "Critical")
+    assert category in ("Very Low", "Low", "Medium", "High", "Critical")
     assert cues.depth_source == "shadow_heuristic"
     assert cues.depth > 0  # darker interior -> positive depth cue
 
@@ -43,7 +43,7 @@ def test_compute_severity_end_to_end_on_real_image_with_midas():
     score, category, cues = compute_severity(image, mask, use_midas=True)
 
     assert 0.0 <= score <= 100.0
-    assert category in ("Low", "Medium", "High", "Critical")
+    assert category in ("Very Low", "Low", "Medium", "High", "Critical")
     assert cues.depth_source == "midas"
     assert 0.0 <= cues.area_ratio <= 1.0
     assert cues.irregularity >= 1.0

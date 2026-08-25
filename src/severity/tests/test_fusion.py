@@ -50,7 +50,21 @@ def test_severity_score_respects_custom_weights():
 
 
 def test_severity_category_thresholds():
-    assert severity_category(10) == "Low"
-    assert severity_category(30) == "Medium"
-    assert severity_category(60) == "High"
+    assert severity_category(10) == "Very Low"
+    assert severity_category(30) == "Low"
+    assert severity_category(50) == "Medium"
+    assert severity_category(70) == "High"
     assert severity_category(90) == "Critical"
+
+
+def test_severity_category_boundaries_and_full_range():
+    assert severity_category(0) == "Very Low"
+    assert severity_category(19.9) == "Very Low"
+    assert severity_category(20) == "Low"
+    assert severity_category(39.9) == "Low"
+    assert severity_category(40) == "Medium"
+    assert severity_category(59.9) == "Medium"
+    assert severity_category(60) == "High"
+    assert severity_category(79.9) == "High"
+    assert severity_category(80) == "Critical"
+    assert severity_category(100) == "Critical"

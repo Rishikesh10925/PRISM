@@ -39,6 +39,16 @@ def traffic_proxy(road_type_weight: float, hour_of_day: int) -> float:
     return float(max(0.0, min(1.0, road_type_weight * multiplier)))
 
 
+def traffic_level_label(proxy: float) -> str:
+    """Plain-language label for the demo UI's "Traffic Level" row -- display layer
+    only, does not change the numeric traffic_proxy used in the priority formula."""
+    if proxy < 0.35:
+        return "Low"
+    if proxy < 0.7:
+        return "Medium"
+    return "High"
+
+
 def haversine_distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     d_phi = math.radians(lat2 - lat1)
@@ -72,3 +82,16 @@ def recurrence_factor(count: int, saturation_count: int = 5) -> float:
     if saturation_count <= 1:
         raise ValueError("saturation_count must be > 1")
     return float(max(0.0, min(1.0, (count - 1) / (saturation_count - 1))))
+
+
+def recurrence_level_label(count: int) -> str:
+    """Plain-language label for the demo UI's "Previous Reports" row, from the raw
+    report count (more intuitive than the normalized recurrence_factor for display) --
+    display layer only, does not change the numeric factor used in the priority formula."""
+    if count <= 1:
+        return "None"
+    if count <= 3:
+        return "Few"
+    if count <= 6:
+        return "Several"
+    return "Many"

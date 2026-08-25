@@ -32,6 +32,21 @@ def priority_score(inputs: PriorityInputs, weights: PriorityWeights | None = Non
     return float(100.0 * weighted_sum / weight_total)
 
 
+PRIORITY_CATEGORIES = ["Less Important", "Moderate", "Important", "Very Important"]
+
+
+def priority_category(score: float) -> str:
+    """Maps P to the four plain-language levels the demo UI shows (display layer only
+    -- does not change how P itself is computed)."""
+    if score < 25:
+        return "Less Important"
+    if score < 50:
+        return "Moderate"
+    if score < 75:
+        return "Important"
+    return "Very Important"
+
+
 def rank_potholes(
     inputs_by_id: dict[str, PriorityInputs], weights: PriorityWeights | None = None
 ) -> list[tuple[str, float]]:

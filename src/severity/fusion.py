@@ -77,14 +77,20 @@ def severity_score(
     return float(100.0 * fused)
 
 
+SEVERITY_CATEGORIES = ["Very Low", "Low", "Medium", "High", "Critical"]
+
+
 def severity_category(score: float) -> str:
-    """Maps S to the Low/Medium/High/Critical labels the dashboard/worklist show
-    (blueprint Section 3C) -- quartile-style thresholds, uncalibrated for the same
-    reason as the fusion weights above."""
-    if score < 25:
+    """Maps S to the Very Low/Low/Medium/High/Critical labels the dashboard/worklist
+    show (blueprint Section 3C extended with a fifth tier for the demo UI) -- even
+    20-point-wide bands, uncalibrated for the same reason as the fusion weights above.
+    This is a display-layer mapping only; it does not change how S itself is computed."""
+    if score < 20:
+        return "Very Low"
+    if score < 40:
         return "Low"
-    if score < 50:
+    if score < 60:
         return "Medium"
-    if score < 75:
+    if score < 80:
         return "High"
     return "Critical"
