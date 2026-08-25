@@ -56,12 +56,26 @@ def train(
     model = build_model().to(device)
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.SGD(params, lr=lr, momentum=0.9, weight_decay=0.0005)
+    # Standard torchvision detection recipe: decay LR twice over training (StepLR) plus
+    # a linear warmup during the first epoch only, to avoid the loss-explosion risk of
+    # starting a randomly-initialized detection head at full LR. Earlier runs used a
+    # flat LR the whole way through, which is a real fairness gap against YOLOv8's
+    # tuned cosine+warmup schedule -- see docs/phase3/04_detection_results.md.
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=max(1, epochs // 3), gamma=0.1)
 
     model.train()
     for epoch in range(epochs):
         epoch_start = time.time()
         epoch_loss = 0.0
         num_batches = 0
+
+        warmup_scheduler = None
+        if epoch == 0:
+            warmup_iters = min(len(loader) - 1, 500)
+            if warmup_iters > 0:
+                warmup_scheduler = torch.optim.lr_scheduler.LinearLR(
+                    optimizer, start_factor=1.0 / 1000, total_iters=warmup_iters
+                )
 
         for images, targets in loader:
             images = [img.to(device) for img in images]
@@ -73,12 +87,19 @@ def train(
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            if warmup_scheduler is not None:
+                warmup_scheduler.step()
 
             epoch_loss += float(loss)
             num_batches += 1
 
+        lr_scheduler.step()
         avg_loss = epoch_loss / max(num_batches, 1)
-        print(f"[train_maskrcnn] epoch {epoch + 1}/{epochs} loss={avg_loss:.4f} time={time.time() - epoch_start:.1f}s")
+        current_lr = optimizer.param_groups[0]["lr"]
+        print(
+            f"[train_maskrcnn] epoch {epoch + 1}/{epochs} loss={avg_loss:.4f} "
+            f"lr={current_lr:.6f} time={time.time() - epoch_start:.1f}s"
+        )
 
     MODELS_DIR.mkdir(exist_ok=True)
     dest = MODELS_DIR / f"{run_name}.pt"
