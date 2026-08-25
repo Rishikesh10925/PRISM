@@ -84,8 +84,16 @@ st.set_page_config(page_title="PRISM — Pothole Severity & Priority Demo", page
 
 
 @st.cache_resource
-def load_model():
-    return YOLO(str(MODEL_PATH))
+def load_model(model_path: str):
+    """model_path is passed explicitly (not read from the module-level MODEL_PATH
+    inside the function) so st.cache_resource's cache key actually changes when the
+    checkpoint changes -- with a zero-arg cached function, Streamlit can keep serving
+    a stale cached model object after the code changes which checkpoint to load,
+    silently running inference with the wrong model. Bit us for real: after switching
+    MODEL_PATH to the multi-source checkpoint, this cache kept serving the old
+    Pothole-600-only model, which explained a real "nothing detected" pattern on
+    Kaggle-source sample images that the old model was never trained on."""
+    return YOLO(model_path)
 
 
 @st.cache_data(show_spinner=False)
@@ -138,7 +146,7 @@ def run_pipeline(image_bytes: bytes, use_midas: bool) -> dict:
     arr = np.frombuffer(image_bytes, dtype=np.uint8)
     image_bgr = cv2.imdecode(arr, cv2.IMREAD_COLOR)
 
-    model = load_model()
+    model = load_model(str(MODEL_PATH))
     results = model.predict(image_bgr, verbose=False)[0]
 
     potholes = []
