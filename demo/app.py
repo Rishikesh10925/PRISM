@@ -45,7 +45,7 @@ from priority_schema import PriorityInputs, PriorityWeights  # noqa: E402
 from road_type import road_importance_label, road_type_weight  # noqa: E402
 from traffic_recurrence import recurrence_factor, recurrence_level_label, traffic_level_label, traffic_proxy  # noqa: E402
 
-MODEL_PATH = REPO_ROOT / "models" / "yolov8n_seg_augmented.pt"
+MODEL_PATH = REPO_ROOT / "models" / "yolov8n_seg_multisource.pt"
 SAMPLE_MANIFEST = REPO_ROOT / "data" / "annotations" / "splits" / "test.txt"
 
 # Fixed internally -- the blueprint's default weighting (severity matters most, then
