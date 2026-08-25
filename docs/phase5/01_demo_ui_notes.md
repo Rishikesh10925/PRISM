@@ -46,3 +46,19 @@ itself are byte-for-byte the same as before this UI pass. The five/four-level ca
 display-layer mapping on top of the existing continuous scores, verified against their boundaries in
 `src/severity/tests/test_fusion.py::test_severity_category_boundaries_and_full_range` and
 `src/prioritization/tests/test_display_labels.py`.
+
+## A real bug this session: stale cached model after switching checkpoints
+
+After retraining on the multi-source dataset, `demo/app.py`'s `MODEL_PATH` constant was updated to point at
+the new checkpoint — but the dashboard kept detecting almost nothing on any of the new Kaggle-source sample
+photos (Pothole-600 samples still worked). Root cause: `load_model()` was decorated `@st.cache_resource` with
+**no arguments**, so Streamlit's resource cache key never changed when `MODEL_PATH` did — the app kept
+serving the *old*, already-cached `YOLO` object (trained on Pothole-600 only, which never saw the Kaggle
+sources' distribution) even though the footer text correctly printed the new checkpoint's filename (that's
+just string interpolation re-evaluated fresh each render, unrelated to which cached model object was
+actually running inference). A live 10-sample sweep through the real browser UI showed 6/10 "not detected"
+before the fix, 9/10 correct (the 10th being a normal model miss, matching the ~93% hit rate measured via
+direct inference) after. **Fix:** pass the model path as an explicit argument to the cached function
+(`load_model(model_path: str)`), so the cache key changes whenever the checkpoint does — and restarting the
+Streamlit process (not just letting its file-watcher hot-reload `app.py`) is required after this kind of
+change, since `st.cache_resource` values persist across script reloads within the same process.
