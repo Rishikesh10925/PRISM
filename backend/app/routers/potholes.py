@@ -66,6 +66,9 @@ def priority_list(
             priority_category=d.priority_score.category,
             status=d.status,
             submitted_at=d.report.submitted_at,
+            road_type_weight=d.report.road_type_weight or 0.0,
+            traffic_proxy=d.report.traffic_proxy or 0.0,
+            recurrence_factor=d.priority_score.recurrence_factor,
         )
         for d in detections
         if d.severity_score and d.priority_score

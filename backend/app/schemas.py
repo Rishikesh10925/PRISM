@@ -75,6 +75,12 @@ class PriorityListItem(BaseModel):
     priority_category: str
     status: RepairStatus
     submitted_at: datetime
+    # raw components behind priority_score, so a client (e.g. the admin dashboard's
+    # weight sliders, Phase 5 Task 10) can recompute the weighted combination locally
+    # and re-rank instantly, without a round trip or re-running detection.
+    road_type_weight: float
+    traffic_proxy: float
+    recurrence_factor: float
 
 
 class StatusUpdate(BaseModel):
