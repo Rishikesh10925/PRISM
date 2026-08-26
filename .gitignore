@@ -43,3 +43,10 @@ src/detection/tests/__pycache__/
 
 # Word lock files
 ~$*.docx
+backend/.pytest_cache/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/routers/__pycache__/
+backend/app/services/__pycache__/
+backend/tests/__pycache__/
+data/reports/

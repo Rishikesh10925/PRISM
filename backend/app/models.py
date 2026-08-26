@@ -11,12 +11,16 @@ stages of repair.
 from __future__ import annotations
 
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 from geoalchemy2 import Geography
 from geoalchemy2.shape import to_shape
 from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, JSON, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class Base(DeclarativeBase):
@@ -43,7 +47,7 @@ class Report(Base):
     location: Mapped[str] = mapped_column(
         Geography(geometry_type="POINT", srid=4326, spatial_index=False), nullable=False
     )
-    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     road_type_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
     traffic_proxy: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -114,6 +118,6 @@ class PriorityScoreRecord(Base):
     beta: Mapped[float] = mapped_column(Float, nullable=False)
     gamma: Mapped[float] = mapped_column(Float, nullable=False)
     delta: Mapped[float] = mapped_column(Float, nullable=False)
-    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
     detection: Mapped["Detection"] = relationship(back_populates="priority_score")
