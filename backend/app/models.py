@@ -14,6 +14,7 @@ import enum
 from datetime import datetime
 
 from geoalchemy2 import Geography
+from geoalchemy2.shape import to_shape
 from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, JSON, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -35,13 +36,27 @@ class Report(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     image_path: Mapped[str] = mapped_column(String, nullable=False)
-    location: Mapped[str] = mapped_column(Geography(geometry_type="POINT", srid=4326), nullable=False)
+    # spatial_index=False: Alembic's autogenerate already emits an explicit CREATE
+    # INDEX for this column (see the initial migration); geoalchemy2's own default
+    # spatial_index=True double-creates it via a DDL event, which conflicts with
+    # Alembic's explicit one. Let Alembic own all DDL instead.
+    location: Mapped[str] = mapped_column(
+        Geography(geometry_type="POINT", srid=4326, spatial_index=False), nullable=False
+    )
     submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     road_type_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
     traffic_proxy: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     detections: Mapped[list["Detection"]] = relationship(back_populates="report", cascade="all, delete-orphan")
+
+    @property
+    def latitude(self) -> float:
+        return to_shape(self.location).y
+
+    @property
+    def longitude(self) -> float:
+        return to_shape(self.location).x
 
 
 class Detection(Base):
