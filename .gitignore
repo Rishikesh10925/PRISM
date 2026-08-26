@@ -40,3 +40,6 @@ Thumbs.db
 src/preprocessing/tests/__pycache__/
 data/merged/review_sample/overlays/*.jpg
 src/detection/tests/__pycache__/
+
+# Word lock files
+~$*.docx
