@@ -21,8 +21,8 @@ src/
   prioritization/        priority scoring engine
   utils/                 shared helpers
 models/                trained weights (not versioned)
-backend/               FastAPI service (planned, not yet built)
-frontend/              React + Leaflet dashboard (planned, not yet built)
+backend/               FastAPI service + PostgreSQL/PostGIS models, migrations, tests
+frontend/              React + Leaflet citizen upload portal and admin dashboard
 demo/                  local Streamlit demo dashboard (real pipeline, presentation use only — see demo/README.md)
 evaluation/            detection / severity / prioritization metric scripts
 paper/                 paper source and figures
@@ -38,5 +38,9 @@ paper/                 paper source and figures
   baseline are both trained and evaluated.
 - **Phase 4** (severity & prioritization modules) — done except fusion-weight calibration (blocked on the
   Phase 2 human-ratings gap), see [docs/phase4/](docs/phase4/).
-- **Phase 5** (application integration: backend/frontend/database) — not started. [demo/](demo/) is a
-  temporary local dashboard for presenting the working pipeline in the meantime.
+- **Phase 5** (application integration: backend/frontend/database) — done except real-world field
+  testing (walking around and photographing actual roads, which needs a person on site), see
+  [docs/phase5/](docs/phase5/). PostgreSQL+PostGIS database, FastAPI backend (5 endpoints, PDF
+  report generation, 8 passing integration tests), and a React citizen upload portal + admin
+  dashboard (Leaflet map, live-adjustable priority weights) are all built and verified working
+  end-to-end against the real detection/severity/prioritization pipeline.
