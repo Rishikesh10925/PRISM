@@ -1,0 +1,401 @@
+config,image_id,score,category
+full (area+depth+irregularity),kaggle_indian_roads_UngradedRoad_239,24.298,Low
+full (area+depth+irregularity),pothole600_testing_0115,22.716,Low
+full (area+depth+irregularity),pothole600_testing_0094,29.880,Low
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_775,20.876,Low
+full (area+depth+irregularity),kaggle_severity_levels_img-690,11.000,Very Low
+full (area+depth+irregularity),pothole600_testing_0106,12.332,Very Low
+full (area+depth+irregularity),pothole600_testing_0045,12.055,Very Low
+full (area+depth+irregularity),pothole600_testing_0078,21.735,Low
+full (area+depth+irregularity),pothole600_testing_0159,21.650,Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_599 - Copy,8.205,Very Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_47,24.872,Low
+full (area+depth+irregularity),pothole600_testing_0154,18.506,Very Low
+full (area+depth+irregularity),pothole600_testing_0141,14.223,Very Low
+full (area+depth+irregularity),pothole600_testing_0122,19.714,Very Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-314,13.126,Very Low
+full (area+depth+irregularity),pothole600_testing_0065,44.295,Medium
+full (area+depth+irregularity),kaggle_indian_roads_AN_unpaved_135,21.112,Low
+full (area+depth+irregularity),pothole600_testing_0165,24.160,Low
+full (area+depth+irregularity),pothole600_testing_0088,10.328,Very Low
+full (area+depth+irregularity),kaggle_indian_roads_frame+86,20.876,Low
+full (area+depth+irregularity),pothole600_testing_0126,29.283,Low
+full (area+depth+irregularity),pothole600_testing_0015,20.293,Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_205,51.520,Medium
+full (area+depth+irregularity),kaggle_indian_roads_AN_unpaved_219,17.306,Very Low
+full (area+depth+irregularity),pothole600_testing_0160,31.413,Low
+full (area+depth+irregularity),kaggle_severity_levels_img-717,6.060,Very Low
+full (area+depth+irregularity),kaggle_indian_roads_AN_unpaved_104,29.476,Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_14,47.491,Medium
+full (area+depth+irregularity),pothole600_testing_0081,32.000,Low
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_539,42.236,Medium
+full (area+depth+irregularity),pothole600_testing_0128,31.220,Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-433,17.041,Very Low
+full (area+depth+irregularity),pothole600_testing_0089,31.816,Low
+full (area+depth+irregularity),pothole600_testing_0020,13.229,Very Low
+full (area+depth+irregularity),pothole600_testing_0153,13.841,Very Low
+full (area+depth+irregularity),pothole600_testing_0012,10.428,Very Low
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_96,22.669,Low
+full (area+depth+irregularity),kaggle_severity_levels_img-11,14.911,Very Low
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_1395,18.216,Very Low
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_113,9.546,Very Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-227,32.292,Low
+full (area+depth+irregularity),pothole600_testing_0167,25.311,Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-123,6.788,Very Low
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_301,41.659,Medium
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_415,21.124,Low
+full (area+depth+irregularity),pothole600_testing_0040,15.498,Very Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-59,19.408,Very Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-290,33.177,Low
+full (area+depth+irregularity),kaggle_indian_roads_UngradedRoad_77,35.461,Low
+full (area+depth+irregularity),pothole600_testing_0000,10.490,Very Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_447,23.000,Low
+full (area+depth+irregularity),pothole600_testing_0035,13.845,Very Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_451,37.387,Low
+full (area+depth+irregularity),kaggle_indian_roads_frame+445,29.173,Low
+full (area+depth+irregularity),pothole600_testing_0137,27.100,Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_200,8.816,Very Low
+full (area+depth+irregularity),kaggle_indian_roads_AN_unpaved_40,31.624,Low
+full (area+depth+irregularity),kaggle_indian_roads_UngradedRoad_136,30.207,Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-623,53.037,Medium
+full (area+depth+irregularity),pothole600_testing_0001,20.640,Low
+full (area+depth+irregularity),pothole600_testing_0158,21.177,Low
+full (area+depth+irregularity),pothole600_testing_0176,31.390,Low
+full (area+depth+irregularity),kaggle_indian_roads_AN_unpaved_264,17.948,Very Low
+full (area+depth+irregularity),pothole600_testing_0156,28.437,Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-651,28.929,Low
+full (area+depth+irregularity),pothole600_testing_0072,18.919,Very Low
+full (area+depth+irregularity),pothole600_testing_0070,19.065,Very Low
+full (area+depth+irregularity),pothole600_testing_0092,23.957,Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-447,20.117,Low
+full (area+depth+irregularity),pothole600_testing_0043,22.087,Low
+full (area+depth+irregularity),pothole600_testing_0162,29.787,Low
+full (area+depth+irregularity),pothole600_testing_0150,13.611,Very Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-217,18.047,Very Low
+full (area+depth+irregularity),pothole600_testing_0051,14.226,Very Low
+full (area+depth+irregularity),pothole600_testing_0055,9.224,Very Low
+full (area+depth+irregularity),pothole600_testing_0005,10.112,Very Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-341,19.476,Very Low
+full (area+depth+irregularity),pothole600_testing_0021,10.563,Very Low
+full (area+depth+irregularity),kaggle_indian_roads_UngradedRoad_40,34.647,Low
+full (area+depth+irregularity),pothole600_testing_0076,24.351,Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_803,19.117,Very Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-108,11.036,Very Low
+full (area+depth+irregularity),pothole600_testing_0108,10.291,Very Low
+full (area+depth+irregularity),pothole600_testing_0143,19.769,Very Low
+full (area+depth+irregularity),pothole600_testing_0130,14.423,Very Low
+full (area+depth+irregularity),kaggle_indian_roads_AN_unpaved_15,13.206,Very Low
+full (area+depth+irregularity),kaggle_annotated_potholes_img-297,16.452,Very Low
+full (area+depth+irregularity),pothole600_testing_0083,10.108,Very Low
+full (area+depth+irregularity),pothole600_testing_0031,12.794,Very Low
+full (area+depth+irregularity),pothole600_testing_0075,18.840,Very Low
+full (area+depth+irregularity),pothole600_testing_0073,16.248,Very Low
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_716,50.651,Medium
+full (area+depth+irregularity),pothole600_testing_0111,39.704,Low
+full (area+depth+irregularity),kaggle_indian_roads_PotHoles_876,30.512,Low
+full (area+depth+irregularity),pothole600_testing_0050,18.062,Very Low
+full (area+depth+irregularity),pothole600_testing_0066,19.034,Very Low
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_1694,13.668,Very Low
+full (area+depth+irregularity),pothole600_testing_0074,52.456,Medium
+full (area+depth+irregularity),kaggle_indian_roads_AN_unpaved_13,47.348,Medium
+full (area+depth+irregularity),kaggle_potholes_yolov8_pothole_49,28.914,Low
+area_only,kaggle_indian_roads_UngradedRoad_239,48.128,Medium
+area_only,pothole600_testing_0115,7.427,Very Low
+area_only,pothole600_testing_0094,16.872,Very Low
+area_only,kaggle_potholes_yolov8_pothole_775,26.475,Low
+area_only,kaggle_severity_levels_img-690,0.357,Very Low
+area_only,pothole600_testing_0106,12.149,Very Low
+area_only,pothole600_testing_0045,4.698,Very Low
+area_only,pothole600_testing_0078,14.671,Very Low
+area_only,pothole600_testing_0159,6.102,Very Low
+area_only,kaggle_indian_roads_PotHoles_599 - Copy,7.524,Very Low
+area_only,kaggle_indian_roads_PotHoles_47,63.557,High
+area_only,pothole600_testing_0154,7.633,Very Low
+area_only,pothole600_testing_0141,10.612,Very Low
+area_only,pothole600_testing_0122,19.079,Very Low
+area_only,kaggle_annotated_potholes_img-314,25.832,Low
+area_only,pothole600_testing_0065,33.075,Low
+area_only,kaggle_indian_roads_AN_unpaved_135,20.530,Low
+area_only,pothole600_testing_0165,56.192,Medium
+area_only,pothole600_testing_0088,10.328,Very Low
+area_only,kaggle_indian_roads_frame+86,10.869,Very Low
+area_only,pothole600_testing_0126,27.107,Low
+area_only,pothole600_testing_0015,4.681,Very Low
+area_only,kaggle_indian_roads_PotHoles_205,41.448,Medium
+area_only,kaggle_indian_roads_AN_unpaved_219,16.342,Very Low
+area_only,pothole600_testing_0160,10.635,Very Low
+area_only,kaggle_severity_levels_img-717,0.095,Very Low
+area_only,kaggle_indian_roads_AN_unpaved_104,28.949,Low
+area_only,kaggle_indian_roads_PotHoles_14,16.521,Very Low
+area_only,pothole600_testing_0081,14.646,Very Low
+area_only,kaggle_potholes_yolov8_pothole_539,40.547,Medium
+area_only,pothole600_testing_0128,27.181,Low
+area_only,kaggle_annotated_potholes_img-433,20.240,Low
+area_only,pothole600_testing_0089,18.167,Very Low
+area_only,pothole600_testing_0020,4.957,Very Low
+area_only,pothole600_testing_0153,28.273,Low
+area_only,pothole600_testing_0012,4.808,Very Low
+area_only,kaggle_potholes_yolov8_pothole_96,35.540,Low
+area_only,kaggle_severity_levels_img-11,10.362,Very Low
+area_only,kaggle_potholes_yolov8_pothole_1395,35.442,Low
+area_only,kaggle_potholes_yolov8_pothole_113,5.533,Very Low
+area_only,kaggle_annotated_potholes_img-227,34.427,Low
+area_only,pothole600_testing_0167,53.847,Medium
+area_only,kaggle_annotated_potholes_img-123,6.866,Very Low
+area_only,kaggle_potholes_yolov8_pothole_301,24.976,Low
+area_only,kaggle_indian_roads_PotHoles_415,44.850,Medium
+area_only,pothole600_testing_0040,3.785,Very Low
+area_only,kaggle_annotated_potholes_img-59,13.521,Very Low
+area_only,kaggle_annotated_potholes_img-290,55.940,Medium
+area_only,kaggle_indian_roads_UngradedRoad_77,12.560,Very Low
+area_only,pothole600_testing_0000,4.980,Very Low
+area_only,kaggle_indian_roads_PotHoles_447,57.314,Medium
+area_only,pothole600_testing_0035,4.482,Very Low
+area_only,kaggle_indian_roads_PotHoles_451,29.790,Low
+area_only,kaggle_indian_roads_frame+445,76.345,High
+area_only,pothole600_testing_0137,25.520,Low
+area_only,kaggle_indian_roads_PotHoles_200,6.667,Very Low
+area_only,kaggle_indian_roads_AN_unpaved_40,32.519,Low
+area_only,kaggle_indian_roads_UngradedRoad_136,71.133,High
+area_only,kaggle_annotated_potholes_img-623,34.146,Low
+area_only,pothole600_testing_0001,4.802,Very Low
+area_only,pothole600_testing_0158,10.635,Very Low
+area_only,pothole600_testing_0176,29.565,Low
+area_only,kaggle_indian_roads_AN_unpaved_264,18.669,Very Low
+area_only,pothole600_testing_0156,5.996,Very Low
+area_only,kaggle_annotated_potholes_img-651,14.508,Very Low
+area_only,pothole600_testing_0072,18.786,Very Low
+area_only,pothole600_testing_0070,30.222,Low
+area_only,pothole600_testing_0092,16.825,Very Low
+area_only,kaggle_annotated_potholes_img-447,30.382,Low
+area_only,pothole600_testing_0043,4.706,Very Low
+area_only,pothole600_testing_0162,6.068,Very Low
+area_only,pothole600_testing_0150,28.208,Low
+area_only,kaggle_annotated_potholes_img-217,2.889,Very Low
+area_only,pothole600_testing_0051,3.736,Very Low
+area_only,pothole600_testing_0055,3.606,Very Low
+area_only,pothole600_testing_0005,4.021,Very Low
+area_only,kaggle_annotated_potholes_img-341,22.091,Low
+area_only,pothole600_testing_0021,4.246,Very Low
+area_only,kaggle_indian_roads_UngradedRoad_40,3.942,Very Low
+area_only,pothole600_testing_0076,24.354,Low
+area_only,kaggle_indian_roads_PotHoles_803,7.060,Very Low
+area_only,kaggle_annotated_potholes_img-108,6.990,Very Low
+area_only,pothole600_testing_0108,7.856,Very Low
+area_only,pothole600_testing_0143,16.528,Very Low
+area_only,pothole600_testing_0130,9.942,Very Low
+area_only,kaggle_indian_roads_AN_unpaved_15,4.605,Very Low
+area_only,kaggle_annotated_potholes_img-297,18.173,Very Low
+area_only,pothole600_testing_0083,12.627,Very Low
+area_only,pothole600_testing_0031,4.491,Very Low
+area_only,pothole600_testing_0075,18.801,Very Low
+area_only,pothole600_testing_0073,12.119,Very Low
+area_only,kaggle_potholes_yolov8_pothole_716,19.337,Very Low
+area_only,pothole600_testing_0111,11.559,Very Low
+area_only,kaggle_indian_roads_PotHoles_876,24.471,Low
+area_only,pothole600_testing_0050,3.658,Very Low
+area_only,pothole600_testing_0066,18.784,Very Low
+area_only,kaggle_potholes_yolov8_pothole_1694,11.963,Very Low
+area_only,pothole600_testing_0074,30.162,Low
+area_only,kaggle_indian_roads_AN_unpaved_13,28.163,Low
+area_only,kaggle_potholes_yolov8_pothole_49,29.170,Low
+area+depth,kaggle_indian_roads_UngradedRoad_239,28.409,Low
+area+depth,pothole600_testing_0115,13.239,Very Low
+area+depth,pothole600_testing_0094,34.301,Low
+area+depth,kaggle_potholes_yolov8_pothole_775,13.237,Very Low
+area+depth,kaggle_severity_levels_img-690,0.179,Very Low
+area+depth,pothole600_testing_0106,6.074,Very Low
+area+depth,pothole600_testing_0045,2.349,Very Low
+area+depth,pothole600_testing_0078,7.335,Very Low
+area+depth,pothole600_testing_0159,6.673,Very Low
+area+depth,kaggle_indian_roads_PotHoles_599 - Copy,3.762,Very Low
+area+depth,kaggle_indian_roads_PotHoles_47,31.778,Low
+area+depth,pothole600_testing_0154,3.817,Very Low
+area+depth,pothole600_testing_0141,5.306,Very Low
+area+depth,pothole600_testing_0122,15.864,Very Low
+area+depth,kaggle_annotated_potholes_img-314,12.916,Very Low
+area+depth,pothole600_testing_0065,47.379,Medium
+area+depth,kaggle_indian_roads_AN_unpaved_135,10.265,Very Low
+area+depth,pothole600_testing_0165,28.096,Low
+area+depth,pothole600_testing_0088,5.164,Very Low
+area+depth,kaggle_indian_roads_frame+86,5.435,Very Low
+area+depth,pothole600_testing_0126,26.496,Low
+area+depth,pothole600_testing_0015,14.367,Very Low
+area+depth,kaggle_indian_roads_PotHoles_205,39.367,Low
+area+depth,kaggle_indian_roads_AN_unpaved_219,8.171,Very Low
+area+depth,pothole600_testing_0160,20.463,Low
+area+depth,kaggle_severity_levels_img-717,0.702,Very Low
+area+depth,kaggle_indian_roads_AN_unpaved_104,19.968,Very Low
+area+depth,kaggle_indian_roads_PotHoles_14,46.285,Medium
+area+depth,pothole600_testing_0081,22.753,Low
+area+depth,kaggle_potholes_yolov8_pothole_539,37.844,Low
+area+depth,pothole600_testing_0128,28.991,Low
+area+depth,kaggle_annotated_potholes_img-433,10.120,Very Low
+area+depth,pothole600_testing_0089,36.805,Low
+area+depth,pothole600_testing_0020,2.529,Very Low
+area+depth,pothole600_testing_0153,14.136,Very Low
+area+depth,pothole600_testing_0012,2.404,Very Low
+area+depth,kaggle_potholes_yolov8_pothole_96,17.770,Very Low
+area+depth,kaggle_severity_levels_img-11,5.181,Very Low
+area+depth,kaggle_potholes_yolov8_pothole_1395,17.721,Very Low
+area+depth,kaggle_potholes_yolov8_pothole_113,2.766,Very Low
+area+depth,kaggle_annotated_potholes_img-227,17.214,Very Low
+area+depth,pothole600_testing_0167,26.923,Low
+area+depth,kaggle_annotated_potholes_img-123,3.433,Very Low
+area+depth,kaggle_potholes_yolov8_pothole_301,12.488,Very Low
+area+depth,kaggle_indian_roads_PotHoles_415,22.425,Low
+area+depth,pothole600_testing_0040,1.893,Very Low
+area+depth,kaggle_annotated_potholes_img-59,6.761,Very Low
+area+depth,kaggle_annotated_potholes_img-290,27.970,Low
+area+depth,kaggle_indian_roads_UngradedRoad_77,6.280,Very Low
+area+depth,pothole600_testing_0000,2.490,Very Low
+area+depth,kaggle_indian_roads_PotHoles_447,28.657,Low
+area+depth,pothole600_testing_0035,2.241,Very Low
+area+depth,kaggle_indian_roads_PotHoles_451,40.599,Medium
+area+depth,kaggle_indian_roads_frame+445,38.173,Low
+area+depth,pothole600_testing_0137,29.906,Low
+area+depth,kaggle_indian_roads_PotHoles_200,3.333,Very Low
+area+depth,kaggle_indian_roads_AN_unpaved_40,16.259,Very Low
+area+depth,kaggle_indian_roads_UngradedRoad_136,35.567,Low
+area+depth,kaggle_annotated_potholes_img-623,67.073,High
+area+depth,pothole600_testing_0001,16.718,Very Low
+area+depth,pothole600_testing_0158,5.318,Very Low
+area+depth,pothole600_testing_0176,14.782,Very Low
+area+depth,kaggle_indian_roads_AN_unpaved_264,9.334,Very Low
+area+depth,pothole600_testing_0156,20.112,Low
+area+depth,kaggle_annotated_potholes_img-651,7.254,Very Low
+area+depth,pothole600_testing_0072,9.393,Very Low
+area+depth,pothole600_testing_0070,15.111,Very Low
+area+depth,pothole600_testing_0092,25.907,Low
+area+depth,kaggle_annotated_potholes_img-447,15.191,Very Low
+area+depth,pothole600_testing_0043,16.924,Very Low
+area+depth,pothole600_testing_0162,19.153,Very Low
+area+depth,pothole600_testing_0150,14.104,Very Low
+area+depth,kaggle_annotated_potholes_img-217,14.206,Very Low
+area+depth,pothole600_testing_0051,10.119,Very Low
+area+depth,pothole600_testing_0055,1.803,Very Low
+area+depth,pothole600_testing_0005,2.010,Very Low
+area+depth,kaggle_annotated_potholes_img-341,11.045,Very Low
+area+depth,pothole600_testing_0021,2.123,Very Low
+area+depth,kaggle_indian_roads_UngradedRoad_40,1.971,Very Low
+area+depth,pothole600_testing_0076,12.177,Very Low
+area+depth,kaggle_indian_roads_PotHoles_803,9.064,Very Low
+area+depth,kaggle_annotated_potholes_img-108,3.495,Very Low
+area+depth,pothole600_testing_0108,3.928,Very Low
+area+depth,pothole600_testing_0143,12.781,Very Low
+area+depth,pothole600_testing_0130,4.971,Very Low
+area+depth,kaggle_indian_roads_AN_unpaved_15,3.433,Very Low
+area+depth,kaggle_annotated_potholes_img-297,9.086,Very Low
+area+depth,pothole600_testing_0083,6.314,Very Low
+area+depth,pothole600_testing_0031,2.245,Very Low
+area+depth,pothole600_testing_0075,9.401,Very Low
+area+depth,pothole600_testing_0073,6.059,Very Low
+area+depth,kaggle_potholes_yolov8_pothole_716,59.669,Medium
+area+depth,pothole600_testing_0111,27.588,Low
+area+depth,kaggle_indian_roads_PotHoles_876,26.339,Low
+area+depth,pothole600_testing_0050,15.170,Very Low
+area+depth,pothole600_testing_0066,9.392,Very Low
+area+depth,kaggle_potholes_yolov8_pothole_1694,5.982,Very Low
+area+depth,pothole600_testing_0074,65.081,High
+area+depth,kaggle_indian_roads_AN_unpaved_13,21.023,Low
+area+depth,kaggle_potholes_yolov8_pothole_49,14.585,Very Low
+area+irregularity,kaggle_indian_roads_UngradedRoad_239,32.103,Low
+area+irregularity,pothole600_testing_0115,24.548,Low
+area+irregularity,pothole600_testing_0094,18.955,Very Low
+area+irregularity,kaggle_potholes_yolov8_pothole_775,31.315,Low
+area+irregularity,kaggle_severity_levels_img-690,16.500,Very Low
+area+irregularity,pothole600_testing_0106,18.498,Very Low
+area+irregularity,pothole600_testing_0045,18.083,Very Low
+area+irregularity,pothole600_testing_0078,32.603,Low
+area+irregularity,pothole600_testing_0159,28.853,Low
+area+irregularity,kaggle_indian_roads_PotHoles_599 - Copy,12.308,Very Low
+area+irregularity,kaggle_indian_roads_PotHoles_47,37.307,Low
+area+irregularity,pothole600_testing_0154,27.758,Low
+area+irregularity,pothole600_testing_0141,21.334,Low
+area+irregularity,pothole600_testing_0122,23.246,Low
+area+irregularity,kaggle_annotated_potholes_img-314,19.689,Very Low
+area+irregularity,pothole600_testing_0065,35.601,Low
+area+irregularity,kaggle_indian_roads_AN_unpaved_135,31.668,Low
+area+irregularity,pothole600_testing_0165,36.241,Low
+area+irregularity,pothole600_testing_0088,15.493,Very Low
+area+irregularity,kaggle_indian_roads_frame+86,31.314,Low
+area+irregularity,pothole600_testing_0126,30.983,Low
+area+irregularity,pothole600_testing_0015,18.414,Very Low
+area+irregularity,kaggle_indian_roads_PotHoles_205,58.636,Medium
+area+irregularity,kaggle_indian_roads_AN_unpaved_219,25.959,Low
+area+irregularity,pothole600_testing_0160,31.973,Low
+area+irregularity,kaggle_severity_levels_img-717,8.436,Very Low
+area+irregularity,kaggle_indian_roads_AN_unpaved_104,38.722,Low
+area+irregularity,kaggle_indian_roads_PotHoles_14,33.213,Low
+area+irregularity,pothole600_testing_0081,32.570,Low
+area+irregularity,kaggle_potholes_yolov8_pothole_539,45.784,Medium
+area+irregularity,pothole600_testing_0128,31.430,Low
+area+irregularity,kaggle_annotated_potholes_img-433,25.561,Low
+area+irregularity,pothole600_testing_0089,20.003,Low
+area+irregularity,pothole600_testing_0020,19.794,Very Low
+area+irregularity,pothole600_testing_0153,20.761,Low
+area+irregularity,pothole600_testing_0012,15.642,Very Low
+area+irregularity,kaggle_potholes_yolov8_pothole_96,34.004,Low
+area+irregularity,kaggle_severity_levels_img-11,22.366,Low
+area+irregularity,kaggle_potholes_yolov8_pothole_1395,27.323,Low
+area+irregularity,kaggle_potholes_yolov8_pothole_113,14.318,Very Low
+area+irregularity,kaggle_annotated_potholes_img-227,48.438,Medium
+area+irregularity,pothole600_testing_0167,37.967,Low
+area+irregularity,kaggle_annotated_potholes_img-123,10.181,Very Low
+area+irregularity,kaggle_potholes_yolov8_pothole_301,62.488,High
+area+irregularity,kaggle_indian_roads_PotHoles_415,31.686,Low
+area+irregularity,pothole600_testing_0040,23.247,Low
+area+irregularity,kaggle_annotated_potholes_img-59,29.111,Low
+area+irregularity,kaggle_annotated_potholes_img-290,49.766,Medium
+area+irregularity,kaggle_indian_roads_UngradedRoad_77,53.192,Medium
+area+irregularity,pothole600_testing_0000,15.735,Very Low
+area+irregularity,kaggle_indian_roads_PotHoles_447,34.499,Low
+area+irregularity,pothole600_testing_0035,20.767,Low
+area+irregularity,kaggle_indian_roads_PotHoles_451,30.377,Low
+area+irregularity,kaggle_indian_roads_frame+445,43.760,Medium
+area+irregularity,pothole600_testing_0137,23.504,Low
+area+irregularity,kaggle_indian_roads_PotHoles_200,13.224,Very Low
+area+irregularity,kaggle_indian_roads_AN_unpaved_40,47.436,Medium
+area+irregularity,kaggle_indian_roads_UngradedRoad_136,45.310,Medium
+area+irregularity,kaggle_annotated_potholes_img-623,29.556,Low
+area+irregularity,pothole600_testing_0001,16.643,Very Low
+area+irregularity,pothole600_testing_0158,31.766,Low
+area+irregularity,pothole600_testing_0176,47.085,Medium
+area+irregularity,kaggle_indian_roads_AN_unpaved_264,26.921,Low
+area+irregularity,pothole600_testing_0156,25.541,Low
+area+irregularity,kaggle_annotated_potholes_img-651,43.394,Medium
+area+irregularity,pothole600_testing_0072,28.378,Low
+area+irregularity,pothole600_testing_0070,28.597,Low
+area+irregularity,pothole600_testing_0092,18.441,Very Low
+area+irregularity,kaggle_annotated_potholes_img-447,30.176,Low
+area+irregularity,pothole600_testing_0043,18.559,Very Low
+area+irregularity,pothole600_testing_0162,28.562,Low
+area+irregularity,pothole600_testing_0150,20.417,Low
+area+irregularity,kaggle_annotated_potholes_img-217,14.309,Very Low
+area+irregularity,pothole600_testing_0051,13.088,Very Low
+area+irregularity,pothole600_testing_0055,13.836,Very Low
+area+irregularity,pothole600_testing_0005,15.168,Very Low
+area+irregularity,kaggle_annotated_potholes_img-341,29.215,Low
+area+irregularity,pothole600_testing_0021,15.844,Very Low
+area+irregularity,kaggle_indian_roads_UngradedRoad_40,51.971,Medium
+area+irregularity,pothole600_testing_0076,36.526,Low
+area+irregularity,kaggle_indian_roads_PotHoles_803,23.141,Low
+area+irregularity,kaggle_annotated_potholes_img-108,16.555,Very Low
+area+irregularity,pothole600_testing_0108,15.437,Very Low
+area+irregularity,pothole600_testing_0143,25.137,Low
+area+irregularity,pothole600_testing_0130,21.634,Low
+area+irregularity,kaggle_indian_roads_AN_unpaved_15,18.679,Very Low
+area+irregularity,kaggle_annotated_potholes_img-297,24.679,Low
+area+irregularity,pothole600_testing_0083,15.161,Very Low
+area+irregularity,pothole600_testing_0031,19.191,Very Low
+area+irregularity,pothole600_testing_0075,28.260,Low
+area+irregularity,pothole600_testing_0073,24.372,Low
+area+irregularity,kaggle_potholes_yolov8_pothole_716,25.977,Low
+area+irregularity,pothole600_testing_0111,37.748,Low
+area+irregularity,kaggle_indian_roads_PotHoles_876,31.664,Low
+area+irregularity,pothole600_testing_0050,13.752,Very Low
+area+irregularity,pothole600_testing_0066,28.551,Low
+area+irregularity,kaggle_potholes_yolov8_pothole_1694,20.502,Low
+area+irregularity,pothole600_testing_0074,28.683,Low
+area+irregularity,kaggle_indian_roads_AN_unpaved_13,64.081,High
+area+irregularity,kaggle_potholes_yolov8_pothole_49,43.371,Medium
