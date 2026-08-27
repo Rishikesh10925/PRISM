@@ -1,4 +1,4 @@
-config,kendall_tau_vs_default,top5_overlap_with_default
-default,1.000,5
-severity_only,0.821,5
-traffic_heavy,0.832,2
+config,kendall_tau_vs_default,top5_overlap_with_default,top5_critical_precision,top10_critical_precision
+default,1.000,5,0.000,0.000
+severity_only,0.400,2,0.000,0.000
+traffic_heavy,0.790,5,0.000,0.000

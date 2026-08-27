@@ -1,4 +1,4 @@
-from ablation import WEIGHT_CONFIGS, compare_to_default, run_ablation
+from ablation import WEIGHT_CONFIGS, compare_to_default, run_ablation, topk_critical_precision
 from priority_schema import PriorityInputs
 
 
@@ -41,3 +41,18 @@ def test_compare_to_default_reports_full_agreement_for_default_itself():
 
     assert comparison["default"]["kendall_tau_vs_default"] == 1.0
     assert comparison["default"]["top5_overlap_with_default"] == 2
+
+
+def test_topk_critical_precision_counts_critical_hits_in_top_k():
+    ranking = [("a", 90.0), ("b", 70.0), ("c", 40.0), ("d", 10.0)]
+    categories = {"a": "Critical", "b": "High", "c": "Critical", "d": "Very Low"}
+
+    assert topk_critical_precision(ranking, categories, k=1) == 1.0
+    assert topk_critical_precision(ranking, categories, k=2) == 0.5
+    assert topk_critical_precision(ranking, categories, k=4) == 0.5
+
+
+def test_topk_critical_precision_empty_ranking_is_nan():
+    import math
+
+    assert math.isnan(topk_critical_precision([], {}, k=5))
