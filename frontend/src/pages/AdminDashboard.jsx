@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { fetchPriorityList, pdfReportUrl, updateStatus } from "../api";
 import { priorityCategory, recomputePriority } from "../priorityFormula";
 import ScoreBadge, { priorityColor, severityColor } from "../components/ScoreBadge";
+import Spinner from "../components/Spinner";
 
 const DEFAULT_WEIGHTS = { alpha: 0.4, beta: 0.3, gamma: 0.2, delta: 0.1 };
 const DEFAULT_CENTER = [17.4239, 78.4738]; // Hyderabad -- used only when there's no data yet to center on
@@ -14,6 +15,7 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
 
   async function reload() {
     setLoading(true);
@@ -45,15 +47,36 @@ export default function AdminDashboard() {
   }, [items, weights]);
 
   async function handleStatusChange(detectionId, newStatus) {
-    await updateStatus(detectionId, newStatus);
-    reload();
+    setUpdatingId(detectionId);
+    try {
+      await updateStatus(detectionId, newStatus);
+      await reload();
+    } catch (err) {
+      setError("Could not update status. Is the backend running?");
+    } finally {
+      setUpdatingId(null);
+    }
   }
 
   const mapCenter = ranked.length > 0 ? [ranked[0].latitude, ranked[0].longitude] : DEFAULT_CENTER;
 
+  const criticalCount = ranked.filter((item) => item.severity_category === "Critical").length;
+  const urgentCount = ranked.filter(
+    (item) => item.live_priority_category === "Important" || item.live_priority_category === "Very Important"
+  ).length;
+
   return (
     <div className="page admin-page">
-      <h1>🗺️ Admin Repair Worklist</h1>
+      <div className="admin-header">
+        <h1>🗺️ Admin Repair Worklist</h1>
+        {!loading && ranked.length > 0 && (
+          <div className="stat-row">
+            <span className="stat-pill">{ranked.length} report{ranked.length === 1 ? "" : "s"}</span>
+            <span className="stat-pill stat-pill-critical">{criticalCount} critical severity</span>
+            <span className="stat-pill stat-pill-urgent">{urgentCount} high priority</span>
+          </div>
+        )}
+      </div>
 
       {error && <p className="error-text">{error}</p>}
 
@@ -82,7 +105,12 @@ export default function AdminDashboard() {
 
         <main className="admin-main">
           <div className="map-wrap">
-            <MapContainer center={mapCenter} zoom={12} style={{ height: 350, width: "100%" }}>
+            {loading && (
+              <div className="map-loading-overlay">
+                <Spinner label="Loading map data..." />
+              </div>
+            )}
+            <MapContainer center={mapCenter} zoom={12} style={{ height: "100%", width: "100%" }}>
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution="&copy; OpenStreetMap contributors"
@@ -109,9 +137,14 @@ export default function AdminDashboard() {
           </div>
 
           {loading ? (
-            <p>Loading worklist...</p>
+            <div className="table-skeleton">
+              {[0, 1, 2, 3].map((i) => (
+                <div className="skeleton-row" key={i} />
+              ))}
+            </div>
           ) : (
-            <table className="worklist-table">
+            <div className="table-scroll">
+              <table className="worklist-table">
               <thead>
                 <tr>
                   <th>#</th>
@@ -124,7 +157,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {ranked.map((item, i) => (
-                  <tr key={item.detection_id}>
+                  <tr key={item.detection_id} className={updatingId === item.detection_id ? "row-updating" : ""}>
                     <td>{i + 1}</td>
                     <td><ScoreBadge label={item.severity_category} colorFn={severityColor} /></td>
                     <td>
@@ -133,25 +166,28 @@ export default function AdminDashboard() {
                     </td>
                     <td>{item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}</td>
                     <td>{new Date(item.submitted_at).toLocaleDateString()}</td>
-                    <td>
+                    <td className="status-cell">
                       <select
                         value={item.status}
+                        disabled={updatingId === item.detection_id}
                         onChange={(e) => handleStatusChange(item.detection_id, e.target.value)}
                       >
                         <option value="reported">Reported</option>
                         <option value="in_progress">In progress</option>
                         <option value="repaired">Repaired</option>
                       </select>
+                      {updatingId === item.detection_id && <Spinner size="sm" />}
                     </td>
                   </tr>
                 ))}
                 {ranked.length === 0 && (
                   <tr>
-                    <td colSpan={6}>No reports yet.</td>
+                    <td colSpan={6} className="empty-row">No reports yet — submit one from the citizen upload page.</td>
                   </tr>
                 )}
               </tbody>
-            </table>
+              </table>
+            </div>
           )}
         </main>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { submitReport } from "../api";
 import ScoreBadge, { severityColor, priorityColor } from "../components/ScoreBadge";
+import Spinner from "../components/Spinner";
 
 export default function CitizenUpload() {
   const [file, setFile] = useState(null);
@@ -58,8 +59,15 @@ export default function CitizenUpload() {
 
       {!result && (
         <div className="card">
-          <label className="upload-box">
-            <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} hidden />
+          <label className={`upload-box${submitting ? " upload-box-disabled" : ""}`}>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              disabled={submitting}
+              hidden
+            />
             {preview ? (
               <img src={preview} alt="preview" className="preview-img" />
             ) : (
@@ -69,7 +77,11 @@ export default function CitizenUpload() {
 
           <div className="geo-status">
             {geoStatus === "idle" && "Location will be captured automatically when you pick a photo."}
-            {geoStatus === "locating" && "📍 Getting your location..."}
+            {geoStatus === "locating" && (
+              <span className="geo-locating">
+                <Spinner size="sm" /> Getting your location...
+              </span>
+            )}
             {geoStatus === "ok" && coords && `📍 Location captured: ${coords.lat.toFixed(4)}, ${coords.lon.toFixed(4)}`}
             {geoStatus === "denied" && (
               <span className="geo-warning">
@@ -86,7 +98,13 @@ export default function CitizenUpload() {
             disabled={!file || !coords || submitting}
             onClick={handleSubmit}
           >
-            {submitting ? "Analyzing photo..." : "Submit Report"}
+            {submitting ? (
+              <>
+                <Spinner size="sm" /> Analyzing photo...
+              </>
+            ) : (
+              "Submit Report"
+            )}
           </button>
         </div>
       )}
