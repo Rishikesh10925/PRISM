@@ -98,13 +98,17 @@ def train(
         current_lr = optimizer.param_groups[0]["lr"]
         print(
             f"[train_maskrcnn] epoch {epoch + 1}/{epochs} loss={avg_loss:.4f} "
-            f"lr={current_lr:.6f} time={time.time() - epoch_start:.1f}s"
+            f"lr={current_lr:.6f} time={time.time() - epoch_start:.1f}s",
+            flush=True,
         )
 
-    MODELS_DIR.mkdir(exist_ok=True)
-    dest = MODELS_DIR / f"{run_name}.pt"
-    torch.save(model.state_dict(), dest)
-    print(f"[train_maskrcnn] checkpoint saved -> {dest}")
+        # Save after every epoch, not just at the end -- a long run (GPU-bound, tens of
+        # minutes) shouldn't lose all progress if the process is interrupted partway.
+        MODELS_DIR.mkdir(exist_ok=True)
+        dest = MODELS_DIR / f"{run_name}.pt"
+        torch.save(model.state_dict(), dest)
+        print(f"[train_maskrcnn] checkpoint saved -> {dest} (epoch {epoch + 1}/{epochs})", flush=True)
+
     return dest
 
 
