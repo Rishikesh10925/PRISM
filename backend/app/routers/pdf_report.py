@@ -22,6 +22,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app.auth import get_current_admin
 from app.database import get_db
 from app.models import Detection
 
@@ -35,6 +36,7 @@ def report_pdf(
     min_lon: float | None = None,
     max_lon: float | None = None,
     db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin),
 ) -> StreamingResponse:
     query = select(Detection).options(
         joinedload(Detection.severity_score), joinedload(Detection.priority_score), joinedload(Detection.report)

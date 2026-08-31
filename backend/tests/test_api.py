@@ -24,10 +24,49 @@ def _submit_report(client, image_path=SAMPLE_IMAGE, lat=17.4239, lon=78.4738):
         )
 
 
+def _admin_headers(client):
+    from app.config import ADMIN_USERNAME
+
+    resp = client.post("/api/auth/login", json={"username": ADMIN_USERNAME, "password": "PrismAdmin#2026"})
+    assert resp.status_code == 200, resp.text
+    return {"Authorization": f"Bearer {resp.json()['access_token']}"}
+
+
 def test_health(client):
     resp = client.get("/api/health")
     assert resp.status_code == 200
     assert resp.json() == {"status": "ok"}
+
+
+def test_login_succeeds_with_correct_credentials(client):
+    from app.config import ADMIN_USERNAME
+
+    resp = client.post("/api/auth/login", json={"username": ADMIN_USERNAME, "password": "PrismAdmin#2026"})
+    assert resp.status_code == 200
+    assert resp.json()["token_type"] == "bearer"
+    assert resp.json()["access_token"]
+
+
+def test_login_rejects_wrong_password(client):
+    from app.config import ADMIN_USERNAME
+
+    resp = client.post("/api/auth/login", json={"username": ADMIN_USERNAME, "password": "wrong"})
+    assert resp.status_code == 401
+
+
+def test_login_rejects_wrong_username(client):
+    resp = client.post("/api/auth/login", json={"username": "not-admin", "password": "PrismAdmin#2026"})
+    assert resp.status_code == 401
+
+
+def test_admin_endpoints_reject_missing_or_bad_token(client):
+    assert client.get("/api/potholes").status_code == 401
+    assert client.get("/api/priority-list").status_code == 401
+    assert client.get("/api/report/pdf").status_code == 401
+    assert client.patch("/api/potholes/1/status", json={"status": "repaired"}).status_code == 401
+
+    bad_headers = {"Authorization": "Bearer not-a-real-token"}
+    assert client.get("/api/potholes", headers=bad_headers).status_code == 401
 
 
 def test_create_report_runs_real_pipeline_and_persists(client):
@@ -55,12 +94,13 @@ def test_create_report_rejects_invalid_coordinates(client):
 
 def test_list_and_filter_potholes(client):
     _submit_report(client)
+    headers = _admin_headers(client)
 
-    resp = client.get("/api/potholes")
+    resp = client.get("/api/potholes", headers=headers)
     assert resp.status_code == 200
     assert len(resp.json()) >= 1
 
-    resp_filtered = client.get("/api/potholes", params={"status": "repaired"})
+    resp_filtered = client.get("/api/potholes", params={"status": "repaired"}, headers=headers)
     assert resp_filtered.status_code == 200
     assert resp_filtered.json() == []  # nothing marked repaired yet
 
@@ -68,8 +108,9 @@ def test_list_and_filter_potholes(client):
 def test_priority_list_is_sorted_descending(client):
     _submit_report(client)
     _submit_report(client, lat=17.5, lon=78.5)
+    headers = _admin_headers(client)
 
-    resp = client.get("/api/priority-list")
+    resp = client.get("/api/priority-list", headers=headers)
     assert resp.status_code == 200
     scores = [row["priority_score"] for row in resp.json()]
     assert scores == sorted(scores, reverse=True)
@@ -78,20 +119,22 @@ def test_priority_list_is_sorted_descending(client):
 def test_update_status(client):
     create_resp = _submit_report(client)
     detection_id = create_resp.json()["detections"][0]["id"]
+    headers = _admin_headers(client)
 
-    resp = client.patch(f"/api/potholes/{detection_id}/status", json={"status": "repaired"})
+    resp = client.patch(f"/api/potholes/{detection_id}/status", json={"status": "repaired"}, headers=headers)
     assert resp.status_code == 200
     assert resp.json()["status"] == "repaired"
 
 
 def test_update_status_404_for_unknown_detection(client):
-    resp = client.patch("/api/potholes/999999/status", json={"status": "repaired"})
+    headers = _admin_headers(client)
+    resp = client.patch("/api/potholes/999999/status", json={"status": "repaired"}, headers=headers)
     assert resp.status_code == 404
 
 
 def test_pdf_report_endpoint(client):
     _submit_report(client)
-    resp = client.get("/api/report/pdf")
+    resp = client.get("/api/report/pdf", headers=_admin_headers(client))
     assert resp.status_code == 200
     assert resp.headers["content-type"] == "application/pdf"
     assert resp.content[:4] == b"%PDF"

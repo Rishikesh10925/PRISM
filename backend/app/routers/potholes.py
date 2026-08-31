@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app.auth import get_current_admin
 from app.database import get_db
 from app.models import Detection, RepairStatus, Report
 from app.schemas import DetectionOut, PriorityListItem, StatusUpdate
@@ -22,6 +23,7 @@ def list_potholes(
     status: RepairStatus | None = None,
     min_severity: float | None = None,
     db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin),
 ) -> list[Detection]:
     """List/filter detections by status and/or minimum severity score."""
     query = select(Detection).options(joinedload(Detection.severity_score), joinedload(Detection.priority_score))
@@ -39,6 +41,7 @@ def list_potholes(
 def priority_list(
     status: RepairStatus | None = None,
     db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin),
 ) -> list[PriorityListItem]:
     """The ranked repair worklist -- every detection with a priority score, sorted
     highest priority first."""
@@ -78,7 +81,12 @@ def priority_list(
 
 
 @router.patch("/potholes/{detection_id}/status", response_model=DetectionOut)
-def update_status(detection_id: int, body: StatusUpdate, db: Session = Depends(get_db)) -> Detection:
+def update_status(
+    detection_id: int,
+    body: StatusUpdate,
+    db: Session = Depends(get_db),
+    admin: str = Depends(get_current_admin),
+) -> Detection:
     detection = db.get(Detection, detection_id)
     if detection is None:
         raise HTTPException(status_code=404, detail="detection not found")
