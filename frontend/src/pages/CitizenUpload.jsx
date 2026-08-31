@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { submitReport } from "../api";
-import ScoreBadge, { severityColor, priorityColor } from "../components/ScoreBadge";
+import { severityColor, priorityColor } from "../components/ScoreBadge";
 import Spinner from "../components/Spinner";
 
 export default function CitizenUpload() {
@@ -11,15 +11,26 @@ export default function CitizenUpload() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
 
-  function handleFileChange(e) {
-    const f = e.target.files?.[0];
-    if (!f) return;
+  function pickFile(f) {
+    if (!f || !f.type?.startsWith("image/")) return;
     setFile(f);
     setPreview(URL.createObjectURL(f));
     setResult(null);
     setError(null);
     captureLocation();
+  }
+
+  function handleFileChange(e) {
+    pickFile(e.target.files?.[0]);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setDragActive(false);
+    if (submitting) return;
+    pickFile(e.dataTransfer.files?.[0]);
   }
 
   function captureLocation() {
@@ -54,12 +65,25 @@ export default function CitizenUpload() {
 
   return (
     <div className="page citizen-page">
-      <h1>🛣️ Report a Pothole</h1>
-      <p className="subtitle">Take or upload a photo of the pothole — we'll detect it and assess how urgent it is.</p>
+      <div className="page-hero">
+        <span className="page-hero-icon">🛣️</span>
+        <div>
+          <h1>Report a Pothole</h1>
+          <p className="subtitle">Take or upload a photo — we'll detect it and assess how urgent it is, automatically.</p>
+        </div>
+      </div>
 
       {!result && (
         <div className="card">
-          <label className={`upload-box${submitting ? " upload-box-disabled" : ""}`}>
+          <label
+            className={`upload-box${submitting ? " upload-box-disabled" : ""}${dragActive ? " upload-box-active" : ""}`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              if (!submitting) setDragActive(true);
+            }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={handleDrop}
+          >
             <input
               type="file"
               accept="image/*"
@@ -71,7 +95,11 @@ export default function CitizenUpload() {
             {preview ? (
               <img src={preview} alt="preview" className="preview-img" />
             ) : (
-              <span>📷 Tap to take or choose a photo</span>
+              <div className="upload-placeholder">
+                <span className="upload-icon">📷</span>
+                <span className="upload-primary">Tap to take or choose a photo</span>
+                <span className="upload-secondary">or drag one in</span>
+              </div>
             )}
           </label>
 
@@ -111,19 +139,30 @@ export default function CitizenUpload() {
 
       {result && (
         <div className="card">
-          <h2>✅ Report submitted</h2>
+          <div className="result-header">
+            <span className="result-check">✅</span>
+            <h2>Report submitted</h2>
+          </div>
           <img src={preview} alt="submitted" className="preview-img" />
           {result.detections.length === 0 ? (
-            <p>No potholes were detected in this photo.</p>
+            <p className="no-detections">No potholes were detected in this photo.</p>
           ) : (
             result.detections.map((d) => (
               <div key={d.id} className="detection-summary">
-                <div className="badge-row">
-                  <ScoreBadge label={d.severity_score.category} colorFn={severityColor} />
-                  <ScoreBadge label={d.priority_score.category} colorFn={priorityColor} />
+                <div className="score-tiles">
+                  <ScoreTile
+                    label="Severity"
+                    category={d.severity_score.category}
+                    score={d.severity_score.score}
+                    colorFn={severityColor}
+                  />
+                  <ScoreTile
+                    label="Priority"
+                    category={d.priority_score.category}
+                    score={d.priority_score.score}
+                    colorFn={priorityColor}
+                  />
                 </div>
-                <p>Severity score: {Math.round(d.severity_score.score)} / 100</p>
-                <p>Priority score: {Math.round(d.priority_score.score)} / 100</p>
               </div>
             ))
           )}
@@ -141,6 +180,17 @@ export default function CitizenUpload() {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function ScoreTile({ label, category, score, colorFn }) {
+  const color = colorFn(category);
+  return (
+    <div className="score-tile" style={{ "--tile-color": color }}>
+      <div className="score-tile-value">{Math.round(score)}</div>
+      <div className="score-tile-label">{label}</div>
+      <div className="score-tile-category">{category}</div>
     </div>
   );
 }
