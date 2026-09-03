@@ -12,21 +12,7 @@ Full plans:
 ## Project layout
 
 ```
-data/                 raw, merged, and annotated datasets (not versioned; see data/*/README)
-notebooks/             exploratory notebooks
-src/
-  preprocessing/        dataset cleaning, format conversion, dedup
-  detection/             YOLOv8-seg / Mask R-CNN training & inference
-  severity/              area / depth-proxy / irregularity modules + fusion
-  prioritization/        priority scoring engine
-  utils/                 shared helpers
-models/                trained weights (not versioned)
-backend/               FastAPI service + PostgreSQL/PostGIS models, migrations, tests
-frontend/              React + Leaflet citizen upload portal and admin dashboard
-demo/                  local Streamlit demo dashboard (real pipeline, presentation use only — see demo/README.md)
-evaluation/            detection / severity / prioritization metric scripts
-paper/                 paper source and figures
-```
+
 
 ## Status
 
