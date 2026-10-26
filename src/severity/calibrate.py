@@ -48,12 +48,17 @@ def calibrate(
     cues: list[tuple[float, float, float]],  # (a, d, i) per image, from pipeline.compute_severity_cues
     human_ratings_1_to_5: list[float],
     weight_step: float = 0.1,
-    depth_max_candidates: tuple[float, ...] = (10.0, 20.0, 30.0, 50.0),
+    depth_max_candidates: tuple[float, ...] = (0.05, 0.1, 0.2, 0.3),  # normalized-d units (fusion.DEFAULT_DEPTH_MAX = 0.1)
     irregularity_max_candidates: tuple[float, ...] = (3.0, 5.0, 8.0),
 ) -> CalibrationResult:
     """Grid-searches weights + normalization bounds, returns the config with the best
     Spearman's rho against human_ratings_1_to_5 (rescaled to 0-100 for MAE only; rho is
-    rank-based and scale-invariant so the raw 1-5 ratings are used directly for it)."""
+    rank-based and scale-invariant so the raw 1-5 ratings are used directly for it).
+
+    depth_max candidates are in the units of the d values passed in: the default
+    candidates assume the scale-normalized MiDaS d that pipeline.compute_severity_cues now
+    returns by default; pass e.g. (10, 20, 30, 50) for legacy raw-MiDaS d. Consider
+    centring the candidates on fusion.calibrate_bounds() output."""
     if len(cues) != len(human_ratings_1_to_5):
         raise ValueError("cues and human_ratings_1_to_5 must be the same length")
     if len(cues) < 3:
