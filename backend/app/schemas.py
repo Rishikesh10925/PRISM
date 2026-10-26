@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models import RepairStatus
 
@@ -46,6 +46,12 @@ class DetectionOut(BaseModel):
     priority_score: PriorityScoreOut | None = None
 
 
+TRAFFIC_PROXY_DESCRIPTION = (
+    "Heuristic traffic estimate in [0, 1] = road-type weight x hour-of-day multiplier "
+    "(no live traffic data; see src/prioritization/traffic_recurrence.py)."
+)
+
+
 class ReportOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -56,7 +62,13 @@ class ReportOut(BaseModel):
     submitted_at: datetime
     processed_at: datetime | None
     road_type_weight: float | None
-    traffic_proxy: float | None
+    road_type_source: str | None = Field(
+        None, description="'osm' | 'default_no_road' | 'default_api_error' -- origin of road_type_weight"
+    )
+    traffic_proxy: float | None = Field(description=TRAFFIC_PROXY_DESCRIPTION)
+    time_source: str | None = Field(
+        None, description="'exif' (photo DateTimeOriginal hour) | 'server' -- hour used for traffic_proxy"
+    )
     detections: list[DetectionOut] = []
 
 
@@ -79,7 +91,7 @@ class PriorityListItem(BaseModel):
     # weight sliders, Phase 5 Task 10) can recompute the weighted combination locally
     # and re-rank instantly, without a round trip or re-running detection.
     road_type_weight: float
-    traffic_proxy: float
+    traffic_proxy: float = Field(description=TRAFFIC_PROXY_DESCRIPTION)
     recurrence_factor: float
 
 

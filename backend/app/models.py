@@ -50,7 +50,14 @@ class Report(Base):
     submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     road_type_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # where road_type_weight came from: "osm" | "default_no_road" | "default_api_error"
+    # (road_type.SOURCE_*), so a fallback 0.4 is distinguishable from a real OSM lookup.
+    road_type_source: Mapped[str | None] = mapped_column(String, nullable=True)
+    # heuristic (road type x hour-of-day multiplier), NOT measured traffic -- see
+    # src/prioritization/traffic_recurrence.py
     traffic_proxy: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # which clock gave the hour fed to traffic_proxy: "exif" (photo DateTimeOriginal) | "server"
+    time_source: Mapped[str | None] = mapped_column(String, nullable=True)
 
     detections: Mapped[list["Detection"]] = relationship(back_populates="report", cascade="all, delete-orphan")
 

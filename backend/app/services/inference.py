@@ -25,7 +25,7 @@ from ultralytics import YOLO  # noqa: E402
 from pipeline import compute_severity  # noqa: E402
 from formula import priority_category, priority_score  # noqa: E402
 from priority_schema import PriorityInputs, PriorityWeights  # noqa: E402
-from road_type import road_type_weight  # noqa: E402
+from road_type import road_type_weight_with_source  # noqa: E402
 from traffic_recurrence import recurrence_factor, traffic_proxy  # noqa: E402
 
 from app.config import USE_MIDAS, YOLO_MODEL_PATH
@@ -69,10 +69,15 @@ def analyze_report_image(
     report_hour: int | None = None,
     report_count: int = 1,
     weights: PriorityWeights | None = None,
-) -> tuple[list[DetectionResult], float, float]:
+) -> tuple[list[DetectionResult], float, str, float]:
     """Runs detection -> severity -> priority on one uploaded photo. Returns
-    (detections, road_type_weight, traffic_proxy) -- the latter two are stored on the
-    Report row since they're shared context for every detection in the same photo."""
+    (detections, road_type_weight, road_type_source, traffic_proxy) -- the latter three
+    are stored on the Report row since they're shared context for every detection in the
+    same photo. road_type_source is road_type.SOURCE_* ("osm" / "default_no_road" /
+    "default_api_error"). traffic_proxy is a heuristic (road type x hour-of-day
+    multiplier for report_hour, default server-local hour), not measured traffic.
+    report_count = number of independent reports of this spot including this one
+    (feeds recurrence_factor; 1 = first report -> 0)."""
     weights = weights or PriorityWeights()
     hour = report_hour if report_hour is not None else datetime.now().hour
 
@@ -83,7 +88,7 @@ def analyze_report_image(
     # 0.809, 136 -> 153 GT instances matched at IoU >= 0.5).
     results = model.predict(image_bgr, verbose=False, retina_masks=True)[0]
 
-    rt_weight = road_type_weight(latitude, longitude)
+    rt_weight, rt_source = road_type_weight_with_source(latitude, longitude)
     t_proxy = traffic_proxy(rt_weight, hour)
     rec_factor = recurrence_factor(report_count)
 
@@ -128,4 +133,4 @@ def analyze_report_image(
                 )
             )
 
-    return detections, rt_weight, t_proxy
+    return detections, rt_weight, rt_source, t_proxy

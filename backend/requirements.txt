@@ -7,6 +7,7 @@ psycopg[binary]>=3.2.3
 alembic>=1.13.3
 pydantic>=2.9.0
 python-multipart>=0.0.12
+pillow>=10.0  # upload validation + EXIF (app/services/uploads.py)
 reportlab>=4.2.5
 httpx>=0.27.2
 pytest>=8.0.0
