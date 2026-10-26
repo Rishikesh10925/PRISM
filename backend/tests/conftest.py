@@ -13,6 +13,38 @@ from app.main import app
 from app.models import Base
 
 
+@pytest.fixture(autouse=True)
+def fake_overpass(monkeypatch):
+    """Never hit the live Overpass API from backend tests: by default every lookup finds
+    a residential road. Tests can set .result to a list of OSM elements, or to an
+    exception instance to simulate the API being down."""
+    import road_type  # importable once app.services.inference has extended sys.path
+
+    class FakeOverpass:
+        result: object = [{"tags": {"highway": "residential"}}]
+
+        def __call__(self, lat, lon, radius_m=50, timeout=15.0):
+            if isinstance(self.result, Exception):
+                raise self.result
+            return self.result
+
+    fake = FakeOverpass()
+    road_type._source_cache.clear()
+    monkeypatch.setattr(road_type, "fetch_highway_elements", fake)
+    yield fake
+    road_type._source_cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def upload_dir(tmp_path, monkeypatch):
+    """Store uploaded photos in a per-test temp dir, not the real data/reports."""
+    from app import config
+
+    path = tmp_path / "uploads"
+    monkeypatch.setattr(config, "UPLOAD_DIR", path)
+    return path
+
+
 @pytest.fixture(scope="session")
 def test_engine():
     """Runs against the real local Postgres+PostGIS (docker-compose), in a schema
@@ -20,14 +52,16 @@ def test_engine():
     substitute, so this is the real database, just isolated by schema."""
     engine = create_engine(DATABASE_URL)
     with engine.begin() as conn:
-        conn.execute(text("CREATE SCHEMA IF NOT EXISTS test"))
-        conn.execute(text("SET search_path TO test, public"))
-    Base.metadata.schema = "test"
-    Base.metadata.create_all(engine)
+        conn.execute(text("DROP SCHEMA IF EXISTS test CASCADE"))
+        conn.execute(text("CREATE SCHEMA test"))
+        conn.execute(text("SET LOCAL search_path TO test, public"))
+        # checkfirst=False: with search_path "test, public" the existence check would
+        # find the dev tables in public and silently skip creating the test ones (which
+        # previously made every test run against dev data in public).
+        Base.metadata.create_all(conn, checkfirst=False)
     yield engine
     with engine.begin() as conn:
         conn.execute(text("DROP SCHEMA test CASCADE"))
-    Base.metadata.schema = None
 
 
 @pytest.fixture
