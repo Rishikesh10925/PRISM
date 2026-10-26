@@ -16,6 +16,18 @@ Full plans:
 
 ## Status
 
+**Latest: reliability audit and fixes (October 2026)** — see
+[docs/phase9/01_reliability_improvement_report.md](docs/phase9/01_reliability_improvement_report.md)
+for measured results:
+- Data: frozen, checksummed splits; no train→test leakage; SAM masks 98.7% usable.
+- Detection: test mask mAP@0.5 0.685; threshold 0.35 chosen on val; mask alignment fixed.
+- Severity: validated against held-out human ratings (Spearman ρ 0.31, single rater).
+- Priority: recurrence now wired.
+- Backend: uploads, CORS and secrets hardened.
+- Tests: 203 automated tests.
+
+Earlier phase notes follow. Where they conflict with the October 2026 report, the report wins.
+
 - **Phase 1** (literature review & planning) — done, see [docs/phase1/](docs/phase1/).
 - **Phase 2** (dataset preparation) — partial, see [docs/phase2/](docs/phase2/). Pothole-600 plus four Kaggle
   sources are downloaded and converted; RDD2022 and Roboflow Universe remain access-blocked; the severity
