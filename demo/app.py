@@ -46,6 +46,7 @@ from road_type import road_importance_label, road_type_weight  # noqa: E402
 from traffic_recurrence import recurrence_factor, recurrence_level_label, traffic_level_label, traffic_proxy  # noqa: E402
 
 MODEL_PATH = REPO_ROOT / "models" / "yolov8n_seg_multisource.pt"
+SEVERITY_CONFIG_PATH = REPO_ROOT / "evaluation" / "severity" / "cue_bounds.json"  # fitted on the train split
 SAMPLE_MANIFEST = REPO_ROOT / "data" / "annotations" / "splits" / "test.txt"
 
 # Fixed internally -- the blueprint's default weighting (severity matters most, then
@@ -156,7 +157,9 @@ def run_pipeline(image_bytes: bytes, use_midas: bool) -> dict:
     if results.masks is not None:
         for i, mask_tensor in enumerate(results.masks.data):
             mask = (mask_tensor.cpu().numpy() > 0.5).astype(np.uint8)
-            score, category, cues = compute_severity(image_bgr, mask, use_midas=use_midas)
+            score, category, cues = compute_severity(
+                image_bgr, mask, use_midas=use_midas, config=SEVERITY_CONFIG_PATH if SEVERITY_CONFIG_PATH.exists() else None
+            )
             confidence = float(results.boxes.conf[i]) if results.boxes is not None else None
 
             colored = overlay.copy()

@@ -28,7 +28,7 @@ from priority_schema import PriorityInputs, PriorityWeights  # noqa: E402
 from road_type import road_type_weight_with_source  # noqa: E402
 from traffic_recurrence import recurrence_factor, traffic_proxy  # noqa: E402
 
-from app.config import USE_MIDAS, YOLO_MODEL_PATH
+from app.config import SEVERITY_CONFIG_PATH, USE_MIDAS, YOLO_MODEL_PATH
 
 
 @dataclass
@@ -100,7 +100,9 @@ def analyze_report_image(
             if polygon is None:
                 continue
 
-            score, category, cues = compute_severity(image_bgr, mask, use_midas=USE_MIDAS)
+            score, category, cues = compute_severity(
+                image_bgr, mask, use_midas=USE_MIDAS, config=SEVERITY_CONFIG_PATH if SEVERITY_CONFIG_PATH.exists() else None
+            )
             confidence = float(results.boxes.conf[i]) if results.boxes is not None else 0.0
             box = results.boxes.xyxy[i].tolist() if results.boxes is not None else [0, 0, 0, 0]
 

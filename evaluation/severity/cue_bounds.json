@@ -1,0 +1,56 @@
+{
+  "config": {
+    "area_max": 0.4087675589767157,
+    "depth_max": 0.05084861595137472,
+    "shadow_depth_max": 0.25,
+    "irregularity_max": 3.5462374546254494,
+    "category_thresholds": [
+      20.0,
+      40.0,
+      60.0,
+      80.0
+    ],
+    "weights": {
+      "w_area": 0.3333333333333333,
+      "w_depth": 0.3333333333333333,
+      "w_irregularity": 0.3333333333333333
+    }
+  },
+  "metadata": {
+    "percentile": 95.0,
+    "area_ratio": {
+      "n": 2496,
+      "base_bound": 1.0,
+      "status": "fitted",
+      "bound": 0.4087675589767157,
+      "median": 0.031003793724279836
+    },
+    "depth": {
+      "n": 2496,
+      "base_bound": 0.1,
+      "status": "fitted",
+      "bound": 0.05084861595137472,
+      "median": -0.0004389052965246053
+    },
+    "shadow_depth": {
+      "n": 0,
+      "base_bound": 0.25,
+      "status": "kept base bound (only 0 finite values, need 5)"
+    },
+    "irregularity": {
+      "n": 2496,
+      "base_bound": 5.0,
+      "status": "fitted",
+      "bound": 3.5462374546254494,
+      "median": 1.568424521817839
+    },
+    "n_images": 1143,
+    "n_instances": 2496,
+    "n_skipped_images": 0,
+    "use_midas": true,
+    "depth_sources": [
+      "midas"
+    ],
+    "manifest": "data\\annotations\\splits\\train.txt"
+  }
+}

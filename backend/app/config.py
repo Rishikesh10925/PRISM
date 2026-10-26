@@ -19,6 +19,12 @@ YOLO_MODEL_PATH = os.environ.get(
 )
 USE_MIDAS = os.environ.get("USE_MIDAS", "true").lower() == "true"
 
+# Severity cue bounds fitted on the TRAIN split (src/severity/fit_cue_bounds.py); falls
+# back to SeverityConfig() defaults if the file is missing.
+SEVERITY_CONFIG_PATH = Path(
+    os.environ.get("SEVERITY_CONFIG_PATH", str(REPO_ROOT / "evaluation" / "severity" / "cue_bounds.json"))
+)
+
 # Admin auth (see app/auth.py). The default hash/secret below are for local dev only --
 # ADMIN_PASSWORD_HASH is the bcrypt hash of "PrismAdmin#2026" (see .env.example); both
 # must be overridden via real env vars before this is ever exposed beyond localhost.

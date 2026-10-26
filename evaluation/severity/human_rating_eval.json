@@ -1,0 +1,102 @@
+{
+  "rater": "single rater (project author); no inter-rater agreement available",
+  "excluded_cant_judge": 2,
+  "configs": [
+    {
+      "config": "legacy",
+      "n": 56,
+      "spearman_rho": 0.2622729979915957,
+      "spearman_rho_ci95": [
+        0.0006700756103543217,
+        0.5002324982534444
+      ],
+      "kendall_tau_b": 0.18833934508708544,
+      "score_median": 19.849011689244655,
+      "score_max": 81.3881578696737,
+      "category_agreement": {
+        "exact": 0.3392857142857143,
+        "within_one": 0.75,
+        "quadratic_weighted_kappa": 0.2463627546071776,
+        "predicted_level_counts": {
+          "1": 28,
+          "2": 21,
+          "3": 3,
+          "4": 3,
+          "5": 1
+        }
+      }
+    },
+    {
+      "config": "revised",
+      "n": 56,
+      "spearman_rho": 0.30505359356563466,
+      "spearman_rho_ci95": [
+        0.03566000436320429,
+        0.53609013843712
+      ],
+      "kendall_tau_b": 0.23372231980686506,
+      "score_median": 13.096389865233974,
+      "score_max": 64.50819158816779,
+      "category_agreement": {
+        "exact": 0.35714285714285715,
+        "within_one": 0.6785714285714286,
+        "quadratic_weighted_kappa": 0.08111855789230427,
+        "predicted_level_counts": {
+          "1": 43,
+          "2": 8,
+          "3": 4,
+          "4": 1,
+          "5": 0
+        }
+      }
+    },
+    {
+      "config": "revised_fit",
+      "n": 56,
+      "spearman_rho": 0.30774081690571253,
+      "spearman_rho_ci95": [
+        0.03929994604441608,
+        0.5331254611415267
+      ],
+      "kendall_tau_b": 0.23069678815887976,
+      "score_median": 25.768140476770718,
+      "score_max": 84.36997810382103,
+      "category_agreement": {
+        "exact": 0.30357142857142855,
+        "within_one": 0.7321428571428571,
+        "quadratic_weighted_kappa": 0.3114754098360656,
+        "predicted_level_counts": {
+          "1": 21,
+          "2": 22,
+          "3": 8,
+          "4": 4,
+          "5": 1
+        }
+      }
+    }
+  ],
+  "per_cue_spearman": {
+    "area_ratio": 0.1355435452735255,
+    "depth_raw": 0.1166254929593776,
+    "depth_normalized": 0.09319290543389896,
+    "irregularity_raw": 0.2883928088571522,
+    "irregularity": 0.36105532797285655
+  },
+  "fitted_bounds": {
+    "area_max": 0.4087675589767157,
+    "depth_max": 0.05084861595137472,
+    "shadow_depth_max": 0.25,
+    "irregularity_max": 3.5462374546254494,
+    "category_thresholds": [
+      20.0,
+      40.0,
+      60.0,
+      80.0
+    ],
+    "weights": {
+      "w_area": 0.3333333333333333,
+      "w_depth": 0.3333333333333333,
+      "w_irregularity": 0.3333333333333333
+    }
+  }
+}
