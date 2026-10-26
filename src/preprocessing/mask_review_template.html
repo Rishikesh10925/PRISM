@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRISM Mask Review</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #18202b; --muted: #5d6b7c; --border: #dde2e8;
+    --accent: #2563eb; --good: #15803d; --ok: #b45309; --bad: #b91c1c; --mask: #22d3ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f141a; --panel: #18202a; --text: #e6ebf1; --muted: #93a1b2; --border: #2a3542;
+      --accent: #60a5fa; --good: #4ade80; --ok: #fbbf24; --bad: #f87171; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--panel); flex-wrap: wrap; }
+  h1 { font-size: 16px; margin: 0; }
+  .progress { flex: 1; min-width: 160px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress > div { height: 100%; background: var(--accent); transition: width .2s; }
+  .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .stage { background: #000; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 300px; }
+  .stage-inner { position: relative; max-width: 100%; }
+  .stage img { display: block; width: 100%; height: auto; }
+  .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .stage polygon { fill: var(--mask); fill-opacity: .28; stroke: var(--mask); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .stage.hide-mask svg { display: none; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 14px; align-self: start; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0; }
+  .ratings { display: grid; gap: 8px; }
+  .rate { display: flex; gap: 10px; align-items: flex-start; text-align: left; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font: inherit; cursor: pointer; }
+  .rate kbd { flex: none; }
+  .rate small { display: block; color: var(--muted); }
+  .rate.sel[data-r="good"] { border-color: var(--good); }
+  .rate.sel[data-r="acceptable"] { border-color: var(--ok); }
+  .rate.sel[data-r="bad"] { border-color: var(--bad); }
+  kbd { font: 12px ui-monospace, monospace; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; color: var(--muted); }
+  label.flag { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+  textarea { width: 100%; min-height: 54px; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; resize: vertical; }
+  .nav { display: flex; gap: 8px; }
+  button.btn { flex: 1; padding: 8px 10px; font: inherit; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .help { color: var(--muted); font-size: 13px; }
+  .help p { margin: 4px 0; }
+  .done { color: var(--good); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>PRISM — mask review</h1>
+  <div class="progress"><div id="bar"></div></div>
+  <span class="count" id="count"></span>
+  <button class="btn primary" id="export" style="flex:none">Export CSV</button>
+</header>
+<main>
+  <section>
+    <div class="stage" id="stage">
+      <div class="stage-inner"><img id="img" alt="road image under review"><svg id="svg" preserveAspectRatio="none"></svg></div>
+    </div>
+    <p class="help">Image <b id="itemid"></b> · hold <kbd>Space</kbd> to hide the mask and see the road underneath.</p>
+  </section>
+  <aside class="panel">
+    <h2>How well do the cyan masks cover the potholes?</h2>
+    <div class="ratings">
+      <button class="rate" data-r="good"><kbd>1</kbd><span>Good<small>Every pothole masked; edges follow the pothole closely.</small></span></button>
+      <button class="rate" data-r="acceptable"><kbd>2</kbd><span>Acceptable<small>Right potholes, but edges noticeably loose, tight or ragged.</small></span></button>
+      <button class="rate" data-r="bad"><kbd>3</kbd><span>Bad<small>Mask mostly covers the wrong area, or misses most of a pothole.</small></span></button>
+    </div>
+    <h2>Also tick if present</h2>
+    <label class="flag"><input type="checkbox" data-f="missed"> A visible pothole has no mask <kbd>Q</kbd></label>
+    <label class="flag"><input type="checkbox" data-f="false_mask"> A mask is on something that isn't a pothole <kbd>W</kbd></label>
+    <label class="flag"><input type="checkbox" data-f="artifact"> Burned-in text, boxes or watermark <kbd>E</kbd></label>
+    <textarea id="notes" placeholder="Notes (optional)"></textarea>
+    <div class="nav">
+      <button class="btn" id="prev">← Prev</button>
+      <button class="btn" id="next">Next →</button>
+      <button class="btn" id="skip">Next unrated</button>
+    </div>
+    <div class="help">
+      <p>Pick a rating (<kbd>1</kbd>–<kbd>3</kbd>) and it moves to the next image. Arrow keys go back and forward.</p>
+      <p>Progress is saved in this browser automatically. When finished, press <b>Export CSV</b> and save the file as
+      <code>data/merged/review_sample/mask_review_results.csv</code>.</p>
+      <p id="status"></p>
+    </div>
+  </aside>
+</main>
+<script>
+const ITEMS = /*__ITEMS__*/[];
+const KEY = "prism-mask-review-v1";
+let answers = {};
+try { answers = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { answers = {}; }
+let idx = Math.max(0, ITEMS.findIndex(it => !answers[it.id]?.rating));
+if (idx < 0) idx = 0;
+
+const $ = id => document.getElementById(id);
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(answers)); } catch (e) {} };
+const entry = id => (answers[id] ||= { rating: "", missed: false, false_mask: false, artifact: false, notes: "" });
+
+function render() {
+  const it = ITEMS[idx];
+  const a = answers[it.id] || {};
+  $("img").src = it.src;
+  // Scale every image (small ones included) to the largest size that fits 70vh tall.
+  document.querySelector(".stage-inner").style.width = `min(100%, ${(70 * it.w / it.h).toFixed(2)}vh)`;
+  const svg = $("svg");
+  svg.setAttribute("viewBox", `0 0 ${it.w} ${it.h}`);
+  svg.innerHTML = it.polygons.map(p => `<polygon points="${p.map(xy => xy.join(",")).join(" ")}"/>`).join("");
+  $("itemid").textContent = `${it.id} (${idx + 1} of ${ITEMS.length})`;
+  document.querySelectorAll(".rate").forEach(b => b.classList.toggle("sel", b.dataset.r === a.rating));
+  document.querySelectorAll("[data-f]").forEach(c => c.checked = !!a[c.dataset.f]);
+  $("notes").value = a.notes || "";
+  const done = ITEMS.filter(x => answers[x.id]?.rating).length;
+  $("bar").style.width = `${100 * done / ITEMS.length}%`;
+  $("count").textContent = `${done} / ${ITEMS.length} rated`;
+  $("status").innerHTML = done === ITEMS.length ? '<span class="done">All rated — export the CSV.</span>' : "";
+}
+function go(i) { idx = Math.min(ITEMS.length - 1, Math.max(0, i)); render(); }
+function rate(r) { entry(ITEMS[idx].id).rating = r; save(); idx < ITEMS.length - 1 ? go(idx + 1) : render(); }
+function toggle(f) { const e = entry(ITEMS[idx].id); e[f] = !e[f]; save(); render(); }
+
+document.querySelectorAll(".rate").forEach(b => b.onclick = () => rate(b.dataset.r));
+document.querySelectorAll("[data-f]").forEach(c => c.onchange = () => toggle(c.dataset.f));
+$("notes").oninput = e => { entry(ITEMS[idx].id).notes = e.target.value; save(); };
+$("prev").onclick = () => go(idx - 1);
+$("next").onclick = () => go(idx + 1);
+$("skip").onclick = () => { const j = ITEMS.findIndex(it => !answers[it.id]?.rating); if (j >= 0) go(j); };
+$("export").onclick = () => {
+  const esc = v => `"${String(v).replace(/"/g, '""')}"`;
+  const rows = [["review_id", "image", "rating", "missed_pothole", "false_mask", "artifact", "notes"]];
+  ITEMS.forEach(it => { const a = answers[it.id] || {}; rows.push([it.id, it.image, a.rating || "", !!a.missed, !!a.false_mask, !!a.artifact, a.notes || ""]); });
+  const blob = new Blob([rows.map(r => r.map(esc).join(",")).join("\n")], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "mask_review_results.csv";
+  link.click();
+};
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "TEXTAREA") return;
+  const k = e.key.toLowerCase();
+  if (k === "1") rate("good"); else if (k === "2") rate("acceptable"); else if (k === "3") rate("bad");
+  else if (k === "q") toggle("missed"); else if (k === "w") toggle("false_mask"); else if (k === "e") toggle("artifact");
+  else if (k === "arrowright") go(idx + 1); else if (k === "arrowleft") go(idx - 1);
+  else if (k === " ") { e.preventDefault(); $("stage").classList.add("hide-mask"); }
+});
+document.addEventListener("keyup", e => { if (e.key === " ") $("stage").classList.remove("hide-mask"); });
+if (ITEMS.length) render();
+</script>
+</body>
+</html>
