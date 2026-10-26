@@ -104,34 +104,58 @@ This source therefore uses a broader "pothole" definition than the other four. I
 ([03_kaggle_indian_roads_class_mapping.md](03_kaggle_indian_roads_class_mapping.md)) was set from two
 visual examples per class, and the `UngradedRoad` / `*_unpaved` sub-collections may not follow it.
 
-**Status: measured, not yet acted on.** The manual mask review (§6) includes 56 images from this source
-and will put a number on the problem. What to do about it — drop the source, drop the inconsistent
-sub-collections, or relabel — is decided in Phase 3. That decision must be made on train and val only;
-the frozen test set is still reported as-is, alongside any cleaned subset.
+**Status after manual review (§6):** the reviewer rated all 13 oversized `kaggle_indian_roads`
+instances in the sample as good or acceptable, and flagged none as "not a pothole." So the reviewer
+treats large broken or unpaved patches as potholes, and the masks fit those patches well. **What remains
+is a scope decision, not a label error:** should PRISM's "pothole" class include large surface-failure
+areas? If it does, the definition differs from the other four sources, which label compact holes only.
+That affects detection (mixed targets) and severity (very large area ratios). The decision is recorded
+in Phase 3; any data change is made on train and val only, and the frozen test set is reported as-is.
 
-## 6. SAM pseudo-label quality — awaiting human review
+## 6. SAM pseudo-label quality — measured by manual review
 
-The `review_checklist.csv` sample created at merge time had **0 of 225** rows reviewed. A blind review
-page has been built from it:
+The `review_checklist.csv` sample created at merge time had **0 of 225** rows reviewed. It was reviewed
+on 2026-10-26 through a blind review page:
 
 ```
 cd src/preprocessing
-..\..\.venv\Scripts\python.exe build_mask_review.py        # -> data/merged/review_sample/mask_review.html
-..\..\.venv\Scripts\python.exe summarize_mask_review.py    # after exporting mask_review_results.csv
+start_mask_review.bat                                       # or: python mask_review_server.py
+..\..\.venv\Scripts\python.exe summarize_mask_review.py    # -> evaluation/data_quality/sam_mask_review_summary.json
 ```
 
 - **174 images:** all 154 SAM-masked images in the sample, plus 20 Pothole-600 images with human masks
-  as hidden controls. The control ratings show how strict the reviewer is.
-- Ratings are good / acceptable / bad, plus flags for missed potholes, masks on non-potholes, and
-  burned-in artifacts.
-- The summary reports SAM and control results separately, with Wilson 95% confidence intervals.
+  as hidden controls. The page never showed which was which.
+- **One reviewer (the project author).** There is no inter-rater agreement, so treat these numbers as
+  one person's judgement.
+- Raw ratings: [mask_review_results.csv](../../evaluation/data_quality/mask_review_results.csv).
 
-**Results: pending** — they need a person to do the review. This section will be updated with the
-measured numbers.
+| | Rated | Good | Acceptable | Bad | Usable (good + acceptable), 95% CI | Missed-pothole flag |
+|---|---|---|---|---|---|---|
+| **SAM pseudo-labels** | 154 | 125 | 27 | 2 | **98.7%** (95.4–99.6%) | **10 (6.5%)** |
+| Human-drawn controls | 20 | 16 | 4 | 0 | 100% (83.9–100%) | 0 |
+
+| Source | Good | Acceptable | Bad | Missed-pothole flag |
+|---|---|---|---|---|
+| `kaggle_annotated_potholes` | 45 | 6 | 1 | 4 |
+| `kaggle_indian_roads` | 47 | 9 | 0 | 2 |
+| `kaggle_potholes_yolov8` | 27 | 9 | 0 | 4 |
+| `kaggle_severity_levels` | 6 | 3 | 1 | 0 |
+
+**Conclusions:**
+1. **SAM mask boundaries are about as good as the human-drawn ones**, in this reviewer's judgement:
+   81% vs 80% rated good, and the confidence intervals overlap. Mask boundary quality is not a likely
+   cause of the low detection scores.
+2. **Missing labels are the real label-noise problem.** 6.5% of SAM images (95% CI about 3.6–11.5%)
+   contain a pothole the original box annotators never labelled. That teaches the model to ignore
+   real potholes, which works directly against recall, the model's weakest metric. The source of
+   these misses is the original Kaggle box labels, not SAM.
+3. **No mask was flagged as covering a non-pothole**, including the 13 oversized `kaggle_indian_roads`
+   instances in the sample (2 acceptable, 11 good). See §5.
 
 ## 7. Open items
 
-1. Human SAM-mask review (§6) — blocks the class-definition decision (§5).
+1. ~~Human SAM-mask review (§6)~~ — done. Follow-ups: decide the class definition (§5), and handle
+   unlabelled potholes in training data (§6) in Phase 3.
 2. Kaggle license confirmation (Phase 1 Task 5) — needs a logged-in Kaggle browser session.
 3. Two missing labels (§4) — fix in Phase 3 through a documented label-correction file. Test images
    are corrected only together with re-freezing the manifest and reporting both versions.

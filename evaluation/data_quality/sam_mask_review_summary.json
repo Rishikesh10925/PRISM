@@ -1,0 +1,49 @@
+{
+  "sam_pseudo_label": {
+    "num_rated": 154,
+    "counts": {
+      "good": 125,
+      "acceptable": 27,
+      "bad": 2
+    },
+    "usable_share": 0.987012987012987,
+    "usable_share_ci95": [
+      0.9538885021791514,
+      0.9964313121156858
+    ],
+    "good_share": 0.8116883116883117,
+    "good_share_ci95": [
+      0.7426395922923792,
+      0.8655650888563167
+    ],
+    "flag_counts": {
+      "missed_pothole": 10,
+      "false_mask": 0,
+      "artifact": 0
+    }
+  },
+  "human_drawn_control": {
+    "num_rated": 20,
+    "counts": {
+      "good": 16,
+      "acceptable": 4,
+      "bad": 0
+    },
+    "usable_share": 1.0,
+    "usable_share_ci95": [
+      0.8388698745050667,
+      1.0
+    ],
+    "good_share": 0.8,
+    "good_share_ci95": [
+      0.5839782779742401,
+      0.9193436467288
+    ],
+    "flag_counts": {
+      "missed_pothole": 0,
+      "false_mask": 0,
+      "artifact": 0
+    }
+  },
+  "num_unrated": 0
+}
