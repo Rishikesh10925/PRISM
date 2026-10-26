@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import csv
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -27,6 +28,16 @@ SPLITS_DIR = REPO_ROOT / "data" / "annotations" / "splits"
 sys.path.insert(0, str(REPO_ROOT / "src" / "preprocessing"))
 
 NATIVE_SPLIT_SOURCE_SUFFIXES = {"_training": "train", "_validation": "val", "_testing": "test"}
+
+# apply_offline_augmentation.py writes its "<stem>_aug<N>" copies into the same
+# MERGED_IMAGES_DIR (Ultralytics needs images/ and labels/ side by side), so they must be
+# excluded here -- otherwise a re-run would randomly assign augmented copies of training
+# images to val/test, leaking near-identical train images into evaluation.
+AUGMENTED_STEM_RE = re.compile(r"_aug\d+$")
+
+
+def _is_augmented_copy(image_path: Path) -> bool:
+    return bool(AUGMENTED_STEM_RE.search(image_path.stem))
 
 
 def _source_and_native_split(image_path: Path) -> tuple[str, str | None]:
@@ -45,6 +56,7 @@ def _source_and_native_split(image_path: Path) -> tuple[str, str | None]:
 
 def build_splits(seed: int = 0, train_frac: float = 0.70, val_frac: float = 0.15) -> dict[str, list[str]]:
     images = sorted(MERGED_IMAGES_DIR.glob("*.png")) + sorted(MERGED_IMAGES_DIR.glob("*.jpg"))
+    images = [p for p in images if not _is_augmented_copy(p)]
     if not images:
         raise SystemExit(f"No images found in {MERGED_IMAGES_DIR} — run build_merged_dataset.py first")
 

@@ -47,3 +47,23 @@ def test_build_splits_honors_native_split_and_stratifies_unassigned(tmp_path, mo
     assert other_train == 14  # round(20 * 0.70)
 
     assert (splits_dir / "split_summary.csv").exists()
+
+
+def test_build_splits_excludes_augmented_copies(tmp_path, monkeypatch):
+    import prepare_splits as ps
+
+    images_dir = tmp_path / "images"
+    images_dir.mkdir()
+    for i in range(20):
+        (images_dir / f"othersource_{i:04d}.jpg").touch()
+        (images_dir / f"othersource_{i:04d}_aug0.jpg").touch()
+    (images_dir / "pothole600_training_0000_aug0.png").touch()
+
+    monkeypatch.setattr(ps, "MERGED_IMAGES_DIR", images_dir)
+    monkeypatch.setattr(ps, "SPLITS_DIR", tmp_path / "splits")
+
+    manifest = build_splits(seed=1)
+
+    all_paths = [p for split in manifest.values() for p in split]
+    assert len(all_paths) == 20
+    assert not any("_aug" in Path(p).stem for p in all_paths)

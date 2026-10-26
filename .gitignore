@@ -51,3 +51,6 @@ backend/app/routers/__pycache__/
 backend/app/services/__pycache__/
 backend/tests/__pycache__/
 data/reports/
+
+# SAM/YOLO weights downloaded by ultralytics when tests run from a module directory
+src/**/*.pt
