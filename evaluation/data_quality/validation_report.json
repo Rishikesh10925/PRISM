@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "num_errors": 0,
+  "errors": [],
+  "split_sizes": {
+    "train": 1143,
+    "val": 363,
+    "test": 361
+  },
+  "per_split_source_counts": {
+    "test/kaggle_annotated_potholes": 65,
+    "test/kaggle_indian_roads": 66,
+    "test/kaggle_potholes_yolov8": 46,
+    "test/kaggle_severity_levels": 13,
+    "test/pothole600": 171,
+    "train/kaggle_annotated_potholes": 303,
+    "train/kaggle_indian_roads": 330,
+    "train/kaggle_potholes_yolov8": 211,
+    "train/kaggle_severity_levels": 60,
+    "train/pothole600": 239,
+    "val/kaggle_annotated_potholes": 65,
+    "val/kaggle_indian_roads": 68,
+    "val/kaggle_potholes_yolov8": 45,
+    "val/kaggle_severity_levels": 13,
+    "val/pothole600": 172
+  },
+  "instances_per_split": {
+    "train": 2496,
+    "val": 711,
+    "test": 719
+  },
+  "tiny_instances_per_split": {
+    "train": 89,
+    "val": 25,
+    "test": 56
+  },
+  "empty_label_images": [
+    "val/kaggle_indian_roads_PotHoles_39.jpg",
+    "test/kaggle_indian_roads_PotHoles_38.jpg"
+  ],
+  "split_overlaps": 0,
+  "cross_split_near_duplicate_pairs": 17,
+  "test_images_with_train_near_duplicate": [
+    "pothole600_testing_0002.png",
+    "pothole600_testing_0011.png",
+    "pothole600_testing_0030.png"
+  ]
+}

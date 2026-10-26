@@ -1,0 +1,18 @@
+split_a,image_a,split_b,image_b,phash_distance
+train,kaggle_indian_roads_AN_unpaved_119.jpg,val,kaggle_indian_roads_AN_unpaved_156.jpg,6
+train,kaggle_indian_roads_AN_unpaved_147.jpg,val,kaggle_indian_roads_AN_unpaved_166.jpg,6
+train,kaggle_indian_roads_PotHoles_244.jpg,val,kaggle_indian_roads_PotHoles_199.jpg,6
+train,kaggle_indian_roads_PotHoles_444.jpg,val,kaggle_indian_roads_PotHoles_111.jpg,6
+train,kaggle_indian_roads_PotHoles_49.jpg,val,kaggle_indian_roads_PotHoles_557 - Copy.jpg,6
+train,kaggle_indian_roads_UngradedRoad_203.jpg,val,kaggle_indian_roads_UngradedRoad_202.jpg,6
+train,kaggle_potholes_yolov8_pothole_1168.jpg,val,kaggle_potholes_yolov8_pothole_854.jpg,6
+train,kaggle_potholes_yolov8_pothole_564.jpg,val,kaggle_severity_levels_img-482.jpg,6
+train,pothole600_training_0049.png,test,pothole600_testing_0011.png,6
+train,pothole600_training_0071.png,test,pothole600_testing_0002.png,6
+train,pothole600_training_0140.png,test,pothole600_testing_0030.png,6
+train,pothole600_training_0151.png,val,pothole600_validation_0095.png,6
+train,pothole600_training_0158.png,val,pothole600_validation_0146.png,6
+val,kaggle_indian_roads_frame+100.jpg,test,kaggle_indian_roads_frame+97.jpg,6
+val,kaggle_potholes_yolov8_pothole_952.jpg,test,kaggle_potholes_yolov8_pothole_1746.jpg,6
+val,pothole600_validation_0038.png,test,pothole600_testing_0003.png,6
+val,pothole600_validation_0116.png,test,pothole600_testing_0013.png,6
