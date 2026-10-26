@@ -135,19 +135,29 @@ def run(
     seed: int = 0,
     extra_train_args: dict | None = None,
     evaluate_only: Path | None = None,
+    resume: bool = False,
 ) -> dict:
     record_path = RESULTS_DIR / f"{name}.json"
-    if record_path.exists() or (evaluate_only is None and (RUNS_DIR / name).exists()):
-        raise SystemExit(f"experiment '{name}' already exists -- pick a new name (earlier runs are never overwritten)")
+    last_checkpoint = RUNS_DIR / name / "weights" / "last.pt"
+    if record_path.exists():
+        raise SystemExit(f"experiment '{name}' already finished -- pick a new name (earlier runs are never overwritten)")
+    if resume and not last_checkpoint.exists():
+        raise SystemExit(f"nothing to resume: {last_checkpoint} not found")
+    if not resume and evaluate_only is None and (RUNS_DIR / name).exists():
+        raise SystemExit(f"experiment '{name}' already exists -- pass --resume to continue an interrupted run")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     config = {"model": str(evaluate_only) if evaluate_only else model, "epochs": epochs, "imgsz": imgsz, "batch": batch, "patience": patience, "seed": seed,
               "deterministic": True, **(extra_train_args or {})}
     started = time.time()
+    if resume:
+        # Ultralytics restores the original args (data yaml, seed, epochs...) from the checkpoint.
+        YOLO(str(last_checkpoint)).train(resume=True)
     if evaluate_only is None:
         data_yaml = write_data_yaml(name, train_manifest, DEFAULT_VAL_MANIFESTS["val"])
-        YOLO(model).train(data=str(data_yaml), project=str(RUNS_DIR), name=name, exist_ok=False, device=0,
-                          **{k: v for k, v in config.items() if k != "model"})
+        if not resume:
+            YOLO(model).train(data=str(data_yaml), project=str(RUNS_DIR), name=name, exist_ok=False, device=0,
+                              **{k: v for k, v in config.items() if k != "model"})
         weights = RUNS_DIR / name / "weights" / "best.pt"
         results_csv = RUNS_DIR / name / "results.csv"
         epochs_run = sum(1 for _ in open(results_csv, encoding="utf-8")) - 1
@@ -164,6 +174,7 @@ def run(
         "train_manifest_sha256": sha256_of(train_manifest),
         "train_images": len(train_manifest.read_text(encoding="utf-8").splitlines()),
         "epochs_run": epochs_run,
+        "resumed": resume,  # if true, train_seconds covers only the resumed part
         "train_seconds": train_seconds,
         "checkpoint": str(weights),
         "checkpoint_sha256": sha256_of(weights),
@@ -189,6 +200,7 @@ if __name__ == "__main__":
     parser.add_argument("--patience", type=int, default=100)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--evaluate-only", default=None, help="record an existing checkpoint instead of training")
+    parser.add_argument("--resume", action="store_true", help="continue an interrupted run from its last.pt")
     args = parser.parse_args()
 
     manifest = Path(args.train_manifest)
@@ -203,4 +215,5 @@ if __name__ == "__main__":
         patience=args.patience,
         seed=args.seed,
         evaluate_only=Path(args.evaluate_only) if args.evaluate_only else None,
+        resume=args.resume,
     )
