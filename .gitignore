@@ -54,3 +54,6 @@ data/reports/
 
 # SAM/YOLO weights downloaded by ultralytics when tests run from a module directory
 src/**/*.pt
+
+# severity rating page embeds dataset images (unclear licenses) -- rebuild with build_severity_rating.py
+data/severity_val_subset/severity_rating.html
