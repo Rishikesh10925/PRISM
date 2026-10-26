@@ -77,7 +77,11 @@ def analyze_report_image(
     hour = report_hour if report_hour is not None else datetime.now().hour
 
     model = _load_model(YOLO_MODEL_PATH)
-    results = model.predict(image_bgr, verbose=False)[0]
+    # retina_masks: masks come back at the original image resolution with the letterbox
+    # padding already removed. Resizing the default 640-scale masks.data straight to the
+    # image size misaligned masks on non-square photos (val: matched-instance IoU 0.788 ->
+    # 0.809, 136 -> 153 GT instances matched at IoU >= 0.5).
+    results = model.predict(image_bgr, verbose=False, retina_masks=True)[0]
 
     rt_weight = road_type_weight(latitude, longitude)
     t_proxy = traffic_proxy(rt_weight, hour)
@@ -86,11 +90,7 @@ def analyze_report_image(
     detections: list[DetectionResult] = []
     if results.masks is not None:
         for i, mask_tensor in enumerate(results.masks.data):
-            mask = cv2.resize(
-                mask_tensor.cpu().numpy(),
-                (image_bgr.shape[1], image_bgr.shape[0]),
-                interpolation=cv2.INTER_NEAREST,
-            )
+            mask = (mask_tensor.cpu().numpy() > 0.5).astype(np.uint8)
             polygon = _mask_to_polygon(mask)
             if polygon is None:
                 continue

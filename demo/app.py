@@ -147,15 +147,15 @@ def run_pipeline(image_bytes: bytes, use_midas: bool) -> dict:
     image_bgr = cv2.imdecode(arr, cv2.IMREAD_COLOR)
 
     model = load_model(str(MODEL_PATH))
-    results = model.predict(image_bgr, verbose=False)[0]
+    # retina_masks: masks come back at the original image resolution with the letterbox
+    # padding already removed (a plain resize of masks.data misaligns non-square images).
+    results = model.predict(image_bgr, verbose=False, retina_masks=True)[0]
 
     potholes = []
     overlay = image_bgr.copy()
     if results.masks is not None:
         for i, mask_tensor in enumerate(results.masks.data):
-            mask = cv2.resize(
-                mask_tensor.cpu().numpy(), (image_bgr.shape[1], image_bgr.shape[0]), interpolation=cv2.INTER_NEAREST
-            )
+            mask = (mask_tensor.cpu().numpy() > 0.5).astype(np.uint8)
             score, category, cues = compute_severity(image_bgr, mask, use_midas=use_midas)
             confidence = float(results.boxes.conf[i]) if results.boxes is not None else None
 
