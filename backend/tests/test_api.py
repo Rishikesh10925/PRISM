@@ -138,3 +138,49 @@ def test_pdf_report_endpoint(client):
     assert resp.status_code == 200
     assert resp.headers["content-type"] == "application/pdf"
     assert resp.content[:4] == b"%PDF"
+
+
+def test_pothole_detail_includes_report_and_image_size(client):
+    from PIL import Image
+
+    body = _submit_report(client).json()
+    detection_id = body["detections"][0]["id"]
+    headers = _admin_headers(client)
+
+    resp = client.get(f"/api/potholes/{detection_id}", headers=headers)
+    assert resp.status_code == 200
+    detail = resp.json()
+    assert detail["id"] == detection_id
+    assert detail["severity_score"]["category"]
+    assert detail["report"]["id"] == body["id"]
+    with Image.open(SAMPLE_IMAGE) as image:
+        assert (detail["report"]["image_width"], detail["report"]["image_height"]) == image.size
+
+    assert client.get(f"/api/potholes/{detection_id}").status_code == 401
+    assert client.get("/api/potholes/999999", headers=headers).status_code == 404
+
+
+def test_report_image_served_to_admin_only(client):
+    body = _submit_report(client)
+    report_id = body.json()["id"]
+    headers = _admin_headers(client)
+
+    resp = client.get(f"/api/reports/{report_id}/image", headers=headers)
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == "image/png"
+    assert resp.content == SAMPLE_IMAGE.read_bytes()
+
+    assert client.get(f"/api/reports/{report_id}/image").status_code == 401
+    assert client.get("/api/reports/999999/image", headers=headers).status_code == 404
+
+
+def test_report_image_never_served_from_outside_upload_dir(client, db_session):
+    from app.models import Report
+
+    report_id = _submit_report(client).json()["id"]
+    report = db_session.get(Report, report_id)
+    report.image_path = str(SAMPLE_IMAGE)  # exists, but outside UPLOAD_DIR
+    db_session.flush()
+
+    resp = client.get(f"/api/reports/{report_id}/image", headers=_admin_headers(client))
+    assert resp.status_code == 404

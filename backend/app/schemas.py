@@ -72,6 +72,26 @@ class ReportOut(BaseModel):
     detections: list[DetectionOut] = []
 
 
+class ReportSummaryOut(BaseModel):
+    """The parent report of one detection, for the admin detail view. image_width/height
+    are the stored photo's pixel size, the coordinate space of mask_polygon/bbox."""
+
+    id: int
+    latitude: float
+    longitude: float
+    submitted_at: datetime
+    road_type_weight: float | None
+    road_type_source: str | None
+    traffic_proxy: float | None = Field(description=TRAFFIC_PROXY_DESCRIPTION)
+    time_source: str | None
+    image_width: int | None
+    image_height: int | None
+
+
+class DetectionDetailOut(DetectionOut):
+    report: ReportSummaryOut
+
+
 class PriorityListItem(BaseModel):
     """One row of GET /api/priority-list -- flattened for a worklist table, not the
     full nested report/detection structure."""
