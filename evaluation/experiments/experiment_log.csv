@@ -1,0 +1,2 @@
+name,finished_at,description,model,imgsz,epochs_run,train_images,train_minutes,val_mask_map50,val_mask_map50_95,val_mask_recall,val_box_map50,val_compact_mask_map50,val_compact_mask_map50_95,val_compact_mask_recall,ms_per_image
+D0_deployed_multisource,2026-10-26T11:08:43+00:00,"currently deployed checkpoint (resumed run, Aug 25), recorded for reference",..\..\models\yolov8n_seg_multisource.pt,640,,2286,0.0,0.7278,0.4561,0.6441,0.7501,0.732,0.4583,0.6481,31.0872

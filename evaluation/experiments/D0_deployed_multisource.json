@@ -1,0 +1,58 @@
+{
+  "name": "D0_deployed_multisource",
+  "description": "currently deployed checkpoint (resumed run, Aug 25), recorded for reference",
+  "finished_at": "2026-10-26T11:08:43+00:00",
+  "config": {
+    "model": "..\\..\\models\\yolov8n_seg_multisource.pt",
+    "epochs": 60,
+    "imgsz": 640,
+    "batch": 16,
+    "patience": 100,
+    "seed": 0,
+    "deterministic": true
+  },
+  "train_manifest": "E:\\PRISM\\data\\annotations\\splits\\train_augmented.txt",
+  "train_manifest_sha256": "e2c748c27039130cf77da3eef93efbaf8ad0852e992b41907dc4a04edb1cd952",
+  "train_images": 2286,
+  "epochs_run": null,
+  "train_seconds": 0.0,
+  "checkpoint": "..\\..\\models\\yolov8n_seg_multisource.pt",
+  "checkpoint_sha256": "cebee0bac35d536b286b3b212fb07ca7a355f9adc6f873e3d6f8c4a9080f2406",
+  "git": {
+    "commit": "936832a5211005744b89ae4b9438213cdc82db48",
+    "dirty": false
+  },
+  "environment": {
+    "python": "3.12.10",
+    "torch": "2.13.0+cu130",
+    "ultralytics": "8.4.121",
+    "cuda": "13.0",
+    "gpu": "NVIDIA GeForce RTX 5050 Laptop GPU"
+  },
+  "val_metrics": {
+    "val": {
+      "box_precision": 0.7996445140662826,
+      "box_recall": 0.6567680886818293,
+      "box_map50": 0.7500770991853514,
+      "box_map50_95": 0.495246348596096,
+      "mask_precision": 0.7842325536098427,
+      "mask_recall": 0.6441098608337281,
+      "mask_map50": 0.7278201766030821,
+      "mask_map50_95": 0.4560806343937055,
+      "ms_per_image": 31.08716308539823,
+      "num_images": 363
+    },
+    "val_compact": {
+      "box_precision": 0.7937019490260415,
+      "box_recall": 0.6638054363376252,
+      "box_map50": 0.7544255101407112,
+      "box_map50_95": 0.4982389293879489,
+      "mask_precision": 0.7752323949675245,
+      "mask_recall": 0.648068669527897,
+      "mask_map50": 0.7320005353477819,
+      "mask_map50_95": 0.4582746133330614,
+      "ms_per_image": 13.970205633537057,
+      "num_images": 355
+    }
+  }
+}
