@@ -220,7 +220,21 @@ export default function AdminDashboard() {
                         <ScoreBadge label={item.live_priority_category} colorFn={priorityColor} />{" "}
                         {Math.round(item.live_priority_score)}
                       </td>
-                      <td>{item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}</td>
+                      <td>
+                        <div className="location-cell">
+                          <span>{item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}</span>
+                          <button
+                            type="button"
+                            className="ghost-button small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(`https://www.openstreetmap.org/?mlat=${item.latitude}&mlon=${item.longitude}&zoom=16`, "_blank");
+                            }}
+                          >
+                            View on Map
+                          </button>
+                        </div>
+                      </td>
                       <td>{new Date(item.submitted_at).toLocaleDateString()}</td>
                       <td className="status-cell">
                         <select

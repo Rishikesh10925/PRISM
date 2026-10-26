@@ -308,10 +308,15 @@ h1, h2, h3 {
   transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
 
+.ghost-button.small {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
 .ghost-button:hover {
-  background: #fef2f2;
-  color: var(--danger);
-  border-color: var(--danger-border);
+  background: #f8fafc;
+  color: var(--text);
+  border-color: #cbd5e1;
 }
 
 .result-header {
@@ -692,6 +697,17 @@ select:disabled {
 
 .worklist-table tbody tr.row-updating {
   opacity: 0.6;
+}
+
+.location-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: normal;
+}
+
+.location-cell button {
+  white-space: nowrap;
 }
 
 .status-cell {
