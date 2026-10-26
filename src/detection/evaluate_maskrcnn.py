@@ -26,7 +26,11 @@ EVAL_DIR = REPO_ROOT / "evaluation"
 def evaluate(
     weights_path: str,
     split: str = "test",
-    score_threshold: float = 0.5,
+    # mAP integrates over the whole precision-recall curve, so it must see every detection.
+    # A 0.5 cut truncates the curve and understated mAP (multi-source test mask mAP@0.5:
+    # 0.486 at 0.5 vs 0.544 at 0.05). torchvision already drops scores < 0.05 internally,
+    # matching how Ultralytics' validator scores YOLO (conf=0.001).
+    score_threshold: float = 0.0,
     out_csv: str | None = None,
     device: str = "cuda" if torch.cuda.is_available() else "cpu",
 ) -> dict:
@@ -104,7 +108,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("weights", help="path to a trained Mask R-CNN state_dict .pt file")
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
-    parser.add_argument("--score-threshold", type=float, default=0.5)
+    parser.add_argument("--score-threshold", type=float, default=0.0)
     parser.add_argument("--out-csv", default=None)
     args = parser.parse_args()
 
