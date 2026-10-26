@@ -150,7 +150,7 @@ def run_pipeline(image_bytes: bytes, use_midas: bool) -> dict:
     model = load_model(str(MODEL_PATH))
     # retina_masks: masks come back at the original image resolution with the letterbox
     # padding already removed (a plain resize of masks.data misaligns non-square images).
-    results = model.predict(image_bgr, verbose=False, retina_masks=True)[0]
+    results = model.predict(image_bgr, conf=0.35, verbose=False, retina_masks=True)[0]  # conf chosen on val
 
     potholes = []
     overlay = image_bgr.copy()

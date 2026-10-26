@@ -28,7 +28,7 @@ from priority_schema import PriorityInputs, PriorityWeights  # noqa: E402
 from road_type import road_type_weight_with_source  # noqa: E402
 from traffic_recurrence import recurrence_factor, traffic_proxy  # noqa: E402
 
-from app.config import SEVERITY_CONFIG_PATH, USE_MIDAS, YOLO_MODEL_PATH
+from app.config import SEVERITY_CONFIG_PATH, USE_MIDAS, YOLO_CONF, YOLO_MODEL_PATH
 
 
 @dataclass
@@ -86,7 +86,7 @@ def analyze_report_image(
     # padding already removed. Resizing the default 640-scale masks.data straight to the
     # image size misaligned masks on non-square photos (val: matched-instance IoU 0.788 ->
     # 0.809, 136 -> 153 GT instances matched at IoU >= 0.5).
-    results = model.predict(image_bgr, verbose=False, retina_masks=True)[0]
+    results = model.predict(image_bgr, conf=YOLO_CONF, verbose=False, retina_masks=True)[0]
 
     rt_weight, rt_source = road_type_weight_with_source(latitude, longitude)
     t_proxy = traffic_proxy(rt_weight, hour)

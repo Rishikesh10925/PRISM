@@ -18,6 +18,9 @@ YOLO_MODEL_PATH = os.environ.get(
     "YOLO_MODEL_PATH", str(REPO_ROOT / "models" / "yolov8n_seg_multisource.pt")
 )
 USE_MIDAS = os.environ.get("USE_MIDAS", "true").lower() == "true"
+# Chosen on the VALIDATION split (evaluation/detection/conf_threshold_choice.json): the
+# lowest threshold within 0.005 of max instance-level F1.
+YOLO_CONF = float(os.environ.get("YOLO_CONF", "0.35"))
 
 # Severity cue bounds fitted on the TRAIN split (src/severity/fit_cue_bounds.py); falls
 # back to SeverityConfig() defaults if the file is missing.
