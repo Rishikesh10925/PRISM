@@ -1,0 +1,40 @@
+{
+  "weights": "../../models/yolov8n_seg_multisource.pt",
+  "split": "val",
+  "match_iou": 0.5,
+  "chosen_conf": 0.35,
+  "criterion": "lowest threshold within 0.005 of max F1",
+  "at_chosen": {
+    "conf": 0.35,
+    "tp": 480,
+    "fp": 162,
+    "fn": 231,
+    "precision": 0.7476635514018691,
+    "recall": 0.6751054852320675,
+    "f1": 0.7095343680709535,
+    "f2": 0.6884681583476764,
+    "mean_matched_iou": 0.8239832936086977
+  },
+  "max_f2": {
+    "conf": 0.15,
+    "tp": 524,
+    "fp": 354,
+    "fn": 187,
+    "precision": 0.5968109339407744,
+    "recall": 0.7369901547116737,
+    "f1": 0.659534298300818,
+    "f2": 0.7039226222461042,
+    "mean_matched_iou": 0.8136859642078648
+  },
+  "at_0.25_previous_default": {
+    "conf": 0.25,
+    "tp": 501,
+    "fp": 239,
+    "fn": 210,
+    "precision": 0.677027027027027,
+    "recall": 0.7046413502109705,
+    "f1": 0.6905582356995175,
+    "f2": 0.6989397321428572,
+    "mean_matched_iou": 0.8191122954078319
+  }
+}

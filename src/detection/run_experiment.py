@@ -136,6 +136,7 @@ def run(
     extra_train_args: dict | None = None,
     evaluate_only: Path | None = None,
     resume: bool = False,
+    workers: int | None = None,
 ) -> dict:
     record_path = RESULTS_DIR / f"{name}.json"
     last_checkpoint = RUNS_DIR / name / "weights" / "last.pt"
@@ -152,7 +153,9 @@ def run(
     started = time.time()
     if resume:
         # Ultralytics restores the original args (data yaml, seed, epochs...) from the checkpoint.
-        YOLO(str(last_checkpoint)).train(resume=True)
+        # workers may be lowered on resume (data loading doesn't change the result) -- a
+        # memory-starved laptop crashed E1's DataLoader with the default 8.
+        YOLO(str(last_checkpoint)).train(resume=True, **({"workers": workers} if workers is not None else {}))
     if evaluate_only is None:
         data_yaml = write_data_yaml(name, train_manifest, DEFAULT_VAL_MANIFESTS["val"])
         if not resume:
@@ -201,6 +204,7 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--evaluate-only", default=None, help="record an existing checkpoint instead of training")
     parser.add_argument("--resume", action="store_true", help="continue an interrupted run from its last.pt")
+    parser.add_argument("--workers", type=int, default=None, help="with --resume: DataLoader workers (lower = less RAM)")
     args = parser.parse_args()
 
     manifest = Path(args.train_manifest)
@@ -216,4 +220,5 @@ if __name__ == "__main__":
         seed=args.seed,
         evaluate_only=Path(args.evaluate_only) if args.evaluate_only else None,
         resume=args.resume,
+        workers=args.workers,
     )
