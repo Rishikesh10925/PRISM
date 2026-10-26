@@ -1,0 +1,59 @@
+{
+  "name": "E1_compact_definition",
+  "description": "as E0, minus kaggle_indian_roads images with an instance >20% of frame; resumed at epoch 7 with 2 workers after a RAM crash",
+  "finished_at": "2026-10-26T16:44:21+00:00",
+  "config": {
+    "model": "yolov8n-seg.pt",
+    "epochs": 60,
+    "imgsz": 640,
+    "batch": 16,
+    "patience": 100,
+    "seed": 0,
+    "deterministic": true
+  },
+  "train_manifest": "E:\\PRISM\\data\\annotations\\splits\\experiments\\train_augmented_compact.txt",
+  "train_manifest_sha256": "37f283c33e513061b93fcf26073e9c79039af08fd2b3a417603740ae3bed40b8",
+  "train_images": 2144,
+  "epochs_run": 60,
+  "resumed": true,
+  "train_seconds": 1685.2729408740997,
+  "checkpoint": "E:\\PRISM\\models\\runs\\E1_compact_definition\\weights\\best.pt",
+  "checkpoint_sha256": "630f489f1a22a83b6cdead3d58eddc7e8272a5982eb2cf2e6eebeccd89e20ee6",
+  "git": {
+    "commit": "347438dd7d99e580240b6053cb4c8d1759bdf9a2",
+    "dirty": true
+  },
+  "environment": {
+    "python": "3.12.10",
+    "torch": "2.13.0+cu130",
+    "ultralytics": "8.4.121",
+    "cuda": "13.0",
+    "gpu": "NVIDIA GeForce RTX 5050 Laptop GPU"
+  },
+  "val_metrics": {
+    "val": {
+      "box_precision": 0.8030778145231495,
+      "box_recall": 0.6424091449588825,
+      "box_map50": 0.7391474913238597,
+      "box_map50_95": 0.49014134809498344,
+      "mask_precision": 0.8076624660542878,
+      "mask_recall": 0.6260403149343701,
+      "mask_map50": 0.7197612387843999,
+      "mask_map50_95": 0.4465141977477057,
+      "ms_per_image": 3.3539170798583897,
+      "num_images": 363
+    },
+    "val_compact": {
+      "box_precision": 0.8212910207407929,
+      "box_recall": 0.648068669527897,
+      "box_map50": 0.748534251954216,
+      "box_map50_95": 0.4975728556361494,
+      "mask_precision": 0.8107564689148968,
+      "mask_recall": 0.6351931330472103,
+      "mask_map50": 0.7263628971404548,
+      "mask_map50_95": 0.45371133512962974,
+      "ms_per_image": 3.1668298593295976,
+      "num_images": 355
+    }
+  }
+}

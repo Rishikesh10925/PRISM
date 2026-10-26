@@ -1,2 +1,4 @@
 name,finished_at,description,model,imgsz,epochs_run,train_images,train_minutes,val_mask_map50,val_mask_map50_95,val_mask_recall,val_box_map50,val_compact_mask_map50,val_compact_mask_map50_95,val_compact_mask_recall,ms_per_image
 D0_deployed_multisource,2026-10-26T11:08:43+00:00,"currently deployed checkpoint (resumed run, Aug 25), recorded for reference",..\..\models\yolov8n_seg_multisource.pt,640,,2286,0.0,0.7278,0.4561,0.6441,0.7501,0.732,0.4583,0.6481,31.0872
+E0_baseline_retrain,2026-10-26T16:01:25+00:00,"from-scratch retrain of the deployed setup (yolov8n-seg, 640, 60 ep, seed 0); resumed after interruption at epoch 3",yolov8n-seg.pt,640,60,2286,42.8,0.7221,0.4483,0.6568,0.7464,0.7244,0.4519,0.6609,8.0222
+E1_compact_definition,2026-10-26T16:44:21+00:00,"as E0, minus kaggle_indian_roads images with an instance >20% of frame; resumed at epoch 7 with 2 workers after a RAM crash",yolov8n-seg.pt,640,60,2144,28.1,0.7198,0.4465,0.626,0.7391,0.7264,0.4537,0.6352,3.3539

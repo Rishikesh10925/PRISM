@@ -72,8 +72,19 @@ set. The multi-source model is far more general; its lower headline number refle
 - `kaggle_indian_roads`: 0.49 / 0.53
 
 ### 3.3 Pothole-definition experiment (E1)
-*Pending — training was interrupted by a laptop out-of-memory crash and resumed with fewer
-data-loading workers. The result will be added here: val and `val_compact` metrics vs E0.*
+E1 = E0's exact config, trained without the 142 oversized `kaggle_indian_roads` training images
+(and their augmented copies). It was resumed at epoch 7 with 2 data-loading workers after a laptop
+out-of-memory crash; the worker count does not affect the result.
+
+| Model | Train images | Val mask mAP@0.5 | `val_compact` mask mAP@0.5 | Val mask P / R |
+|---|---|---|---|---|
+| E0 (broad definition) | 2,286 | **0.722** | 0.724 | 0.767 / **0.657** |
+| E1 (compact definition) | 2,144 | 0.720 | **0.726** | **0.808** / 0.626 |
+
+**Result: no meaningful difference** (±0.2 points, within run-to-run noise). Removing the large
+patches trades about 3 points of recall for about 4 points of precision. For pothole reporting,
+recall matters more, and the reviewer accepted the large patches as potholes. **Decision: keep the broad
+definition.** The deployed model (D0) is unchanged, and the test split was not touched for this comparison.
 
 ### 3.4 Failure analysis ([gallery](../../evaluation/failure_gallery/test_worst_deployed_multisource.jpg))
 1. **Small, distant potholes in dense scenes** are the dominant miss. One image alone has 38 of the
