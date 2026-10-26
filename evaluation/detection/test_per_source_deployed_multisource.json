@@ -1,0 +1,52 @@
+{
+  "kaggle_annotated_potholes": {
+    "images": 65,
+    "gt": 182,
+    "tp": 111,
+    "fp": 54,
+    "fn": 71,
+    "no_prediction": 1,
+    "recall": 0.61,
+    "precision": 0.673
+  },
+  "kaggle_indian_roads": {
+    "images": 66,
+    "gt": 110,
+    "tp": 54,
+    "fp": 48,
+    "fn": 56,
+    "no_prediction": 6,
+    "recall": 0.491,
+    "precision": 0.529
+  },
+  "kaggle_potholes_yolov8": {
+    "images": 46,
+    "gt": 216,
+    "tp": 122,
+    "fp": 46,
+    "fn": 94,
+    "no_prediction": 1,
+    "recall": 0.565,
+    "precision": 0.726
+  },
+  "kaggle_severity_levels": {
+    "images": 13,
+    "gt": 24,
+    "tp": 12,
+    "fp": 10,
+    "fn": 12,
+    "no_prediction": 2,
+    "recall": 0.5,
+    "precision": 0.545
+  },
+  "pothole600": {
+    "images": 171,
+    "gt": 187,
+    "tp": 152,
+    "fp": 23,
+    "fn": 35,
+    "no_prediction": 15,
+    "recall": 0.813,
+    "precision": 0.869
+  }
+}
