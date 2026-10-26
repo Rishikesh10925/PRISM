@@ -53,6 +53,7 @@
   <h1>PRISM — mask review</h1>
   <div class="progress"><div id="bar"></div></div>
   <span class="count" id="count"></span>
+  <span class="count" id="saved"></span>
   <button class="btn primary" id="export" style="flex:none">Export CSV</button>
 </header>
 <main>
@@ -81,7 +82,7 @@
     </div>
     <div class="help">
       <p>Pick a rating (<kbd>1</kbd>–<kbd>3</kbd>) and it moves to the next image. Arrow keys go back and forward.</p>
-      <p>Progress is saved in this browser automatically. When finished, press <b>Export CSV</b> and save the file as
+      <p id="filehelp">Progress is saved in this browser automatically. When finished, press <b>Export CSV</b> and save the file as
       <code>data/merged/review_sample/mask_review_results.csv</code>.</p>
       <p id="status"></p>
     </div>
@@ -96,7 +97,23 @@ let idx = Math.max(0, ITEMS.findIndex(it => !answers[it.id]?.rating));
 if (idx < 0) idx = 0;
 
 const $ = id => document.getElementById(id);
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(answers)); } catch (e) {} };
+// Served by mask_review_server.py: every change is written straight to the results CSV.
+// Opened as a plain file: falls back to browser storage plus the Export CSV button.
+const SERVER = location.protocol.startsWith("http");
+let syncTimer = null;
+function exportRows() {
+  return ITEMS.map(it => { const a = answers[it.id] || {};
+    return { review_id: it.id, image: it.image, rating: a.rating || "", missed_pothole: !!a.missed, false_mask: !!a.false_mask, artifact: !!a.artifact, notes: a.notes || "" }; });
+}
+function sync() {
+  if (!SERVER) return;
+  clearTimeout(syncTimer);
+  $("saved").textContent = "Saving…";
+  syncTimer = setTimeout(() => fetch("/save", { method: "POST", body: JSON.stringify(exportRows()) })
+    .then(r => { if (!r.ok) throw new Error(); $("saved").textContent = "✓ Saved"; })
+    .catch(() => { $("saved").textContent = "⚠ Not saved — is the review server still running?"; }), 250);
+}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(answers)); } catch (e) {} sync(); };
 const entry = id => (answers[id] ||= { rating: "", missed: false, false_mask: false, artifact: false, notes: "" });
 
 function render() {
@@ -129,9 +146,9 @@ $("next").onclick = () => go(idx + 1);
 $("skip").onclick = () => { const j = ITEMS.findIndex(it => !answers[it.id]?.rating); if (j >= 0) go(j); };
 $("export").onclick = () => {
   const esc = v => `"${String(v).replace(/"/g, '""')}"`;
-  const rows = [["review_id", "image", "rating", "missed_pothole", "false_mask", "artifact", "notes"]];
-  ITEMS.forEach(it => { const a = answers[it.id] || {}; rows.push([it.id, it.image, a.rating || "", !!a.missed, !!a.false_mask, !!a.artifact, a.notes || ""]); });
-  const blob = new Blob([rows.map(r => r.map(esc).join(",")).join("\n")], { type: "text/csv" });
+  const rows = exportRows();
+  const lines = [Object.keys(rows[0]).join(",")].concat(rows.map(r => Object.values(r).map(esc).join(",")));
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = "mask_review_results.csv";
@@ -146,7 +163,16 @@ document.addEventListener("keydown", e => {
   else if (k === " ") { e.preventDefault(); $("stage").classList.add("hide-mask"); }
 });
 document.addEventListener("keyup", e => { if (e.key === " ") $("stage").classList.remove("hide-mask"); });
-if (ITEMS.length) render();
+if (SERVER) {
+  $("export").style.display = "none";
+  $("filehelp").style.display = "none";
+  // Ratings already on disk win over this browser's copy (e.g. reviewing from another browser).
+  fetch("/answers").then(r => r.json()).then(saved => {
+    if (Object.keys(saved).length) { answers = saved; idx = Math.max(0, ITEMS.findIndex(it => !answers[it.id]?.rating)); }
+    $("saved").textContent = "Ratings save automatically";
+    render();
+  }).catch(() => render());
+} else if (ITEMS.length) render();
 </script>
 </body>
 </html>

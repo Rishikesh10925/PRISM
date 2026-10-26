@@ -46,3 +46,21 @@ def test_select_items_includes_all_sam_and_requested_controls(tmp_path):
     assert sum(r["source"] == "kaggle_x" for r in items) == 5
     assert sum(r["source"].startswith("pothole600") for r in items) == 3
     assert items == select_items(checklist, num_controls=3, seed=0)  # deterministic
+
+
+def test_server_save_then_load_roundtrip(tmp_path):
+    from mask_review_server import load_answers, save_rows
+
+    path = tmp_path / "results.csv"
+    assert load_answers(path) == {}
+    save_rows(path, [
+        {"review_id": "R000", "image": "a.jpg", "rating": "good", "missed_pothole": True, "false_mask": False, "artifact": False, "notes": 'has "quotes", commas'},
+        {"review_id": "R001", "image": "b.jpg", "rating": "", "missed_pothole": False, "false_mask": False, "artifact": False, "notes": ""},
+    ])
+    answers = load_answers(path)
+    assert answers["R000"] == {"rating": "good", "missed": True, "false_mask": False, "artifact": False, "notes": 'has "quotes", commas'}
+    assert answers["R001"]["rating"] == ""
+
+    from summarize_mask_review import summarize
+    with open(path, newline="", encoding="utf-8") as f:
+        assert summarize(list(csv.DictReader(f)))["sam_pseudo_label"]["flag_counts"]["missed_pothole"] == 1
