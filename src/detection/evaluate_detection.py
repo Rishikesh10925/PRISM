@@ -3,10 +3,10 @@
 mAP (from Ultralytics' validator) summarizes the whole precision-recall curve, but the
 deployed backend has to pick ONE confidence threshold. This script:
 
-  select  -- on the VALIDATION split, sweeps thresholds and picks the one with the best
-             F1 (precision/recall of instances matched by mask IoU >= 0.5). F2, which
-             weights recall higher (a missed pothole is costlier for a municipality than
-             a false alarm an inspector can dismiss), is reported alongside.
+  select  -- on the VALIDATION split, sweeps thresholds and picks the lowest one whose
+             F1 (precision/recall of instances matched by mask IoU >= 0.5) is within
+             F1_TIE of the best -- a missed pothole is costlier for a municipality than
+             a false alarm an inspector can dismiss. Max-F2 is reported alongside.
   test    -- run ONCE on the frozen test split for the final model, at the threshold
              chosen on val: Ultralytics mAP metrics + instance-level P/R/F1 + per-image
              TP/FP/FN, empty-prediction images, latency and model size.
@@ -34,6 +34,7 @@ LABELS_DIR = REPO_ROOT / "data" / "merged" / "labels"
 OUT_DIR = REPO_ROOT / "evaluation" / "detection"
 MATCH_IOU = 0.5
 THRESHOLDS = [round(t, 2) for t in np.arange(0.05, 0.91, 0.05)]
+F1_TIE = 0.005
 
 
 def gt_masks(image_stem: str, height: int, width: int) -> list[np.ndarray]:
@@ -115,14 +116,17 @@ def counts_at(records: list[dict], conf: float) -> dict:
 def select(weights: str) -> dict:
     records = predict_split(weights, "val")
     sweep = [counts_at(records, t) for t in THRESHOLDS]
-    best_f1 = max(sweep, key=lambda r: r["f1"])
+    # F1 is usually flat near its peak; among thresholds within F1_TIE of the best, take
+    # the lowest (highest recall) -- a missed pothole costs more than a dismissable alarm.
+    top_f1 = max(r["f1"] for r in sweep)
+    best_f1 = min((r for r in sweep if r["f1"] >= top_f1 - F1_TIE), key=lambda r: r["conf"])
     best_f2 = max(sweep, key=lambda r: r["f2"])
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with open(OUT_DIR / "conf_threshold_sweep_val.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(sweep[0].keys()))
         writer.writeheader()
         writer.writerows(sweep)
-    choice = {"weights": weights, "split": "val", "match_iou": MATCH_IOU, "chosen_conf": best_f1["conf"], "criterion": "max F1",
+    choice = {"weights": weights, "split": "val", "match_iou": MATCH_IOU, "chosen_conf": best_f1["conf"], "criterion": f"lowest threshold within {F1_TIE} of max F1",
               "at_chosen": best_f1, "max_f2": best_f2, "at_0.25_previous_default": counts_at(records, 0.25)}
     (OUT_DIR / "conf_threshold_choice.json").write_text(json.dumps(choice, indent=2), encoding="utf-8")
     print(json.dumps(choice, indent=2))
