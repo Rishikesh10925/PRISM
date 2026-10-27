@@ -1,53 +1,100 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CircleMarker, MapContainer, Popup, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import { downloadPdfReport, fetchPriorityList, updateStatus } from "../api";
 import { priorityCategory, recomputePriority } from "../priorityFormula";
 import { clearToken, getUsername } from "../auth";
-import ScoreBadge, { priorityColor, severityColor } from "../components/ScoreBadge";
+import { CategoryChip, ScoreBar } from "../components/ScoreBadge";
 import Spinner from "../components/Spinner";
+import WorklistMap from "../components/WorklistMap";
+import DetailDrawer from "../components/DetailDrawer";
+import StatusSelect from "../components/StatusSelect";
+import { fullDate, osmUrl, relativeTime } from "../scoring";
+import {
+  AlertCircleIcon,
+  CheckCircleIcon,
+  ChevronDownIcon,
+  ExternalLinkIcon,
+  FileDownIcon,
+  FlagIcon,
+  InboxIcon,
+  LogOutIcon,
+  RefreshIcon,
+  SearchIcon,
+  SlidersIcon,
+  WrenchIcon,
+  AlertTriangleIcon,
+} from "../components/Icons";
 
 const DEFAULT_WEIGHTS = { alpha: 0.4, beta: 0.3, gamma: 0.2, delta: 0.1 };
-const DEFAULT_CENTER = [17.4239, 78.4738]; // Hyderabad -- used only when there's no data yet to center on
+
+const WEIGHT_FIELDS = [
+  { key: "alpha", label: "Pothole severity", hint: "Size, depth and edge damage" },
+  { key: "beta", label: "Road importance", hint: "Arterial vs. residential" },
+  { key: "gamma", label: "Traffic level", hint: "Expected traffic at report time" },
+  { key: "delta", label: "Previous reports", hint: "Repeat reports nearby" },
+];
+
+const STATUS_FILTERS = [
+  { value: "", label: "All" },
+  { value: "reported", label: "Reported" },
+  { value: "in_progress", label: "In progress" },
+  { value: "repaired", label: "Repaired" },
+];
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [weights, setWeights] = useState(DEFAULT_WEIGHTS);
   const [statusFilter, setStatusFilter] = useState("");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [drawerId, setDrawerId] = useState(null);
+  const [panelOpen, setPanelOpen] = useState(false);
 
-  function handleUnauthorized(err) {
-    if (err.response?.status === 401) {
-      navigate("/admin/login", { replace: true });
-      return true;
-    }
-    return false;
-  }
-
-  async function reload() {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchPriorityList(statusFilter || undefined);
-      setItems(data);
-    } catch (err) {
-      if (!handleUnauthorized(err)) {
-        setError("Could not load the worklist. Is the backend running?");
+  const handleUnauthorized = useCallback(
+    (err) => {
+      if (err.response?.status === 401) {
+        navigate("/admin/login", { replace: true });
+        return true;
       }
-    } finally {
-      setLoading(false);
-    }
-  }
+      return false;
+    },
+    [navigate]
+  );
+
+  // The whole list is fetched once and filtered client-side, so the KPI row always
+  // reflects every report regardless of the status filter.
+  const reload = useCallback(
+    async ({ silent = false } = {}) => {
+      if (silent) setRefreshing(true);
+      else setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchPriorityList();
+        setItems(data);
+        setLastUpdated(new Date());
+      } catch (err) {
+        if (!handleUnauthorized(err)) {
+          setError("Could not load the worklist. Is the backend running?");
+        }
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [handleUnauthorized]
+  );
 
   useEffect(() => {
     reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter]);
+  }, [reload]);
 
   // Live re-ranking: recompute priority for every row from its already-fetched raw
   // components as the sliders move -- no network call, no re-running detection.
@@ -60,11 +107,39 @@ export default function AdminDashboard() {
       .sort((a, b) => b.live_priority_score - a.live_priority_score);
   }, [items, weights]);
 
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return ranked
+      .filter((r) => !statusFilter || r.status === statusFilter)
+      .filter((r) => {
+        if (!q) return true;
+        const hay = `${r.detection_id} #${r.detection_id} ${r.report_id} ${r.latitude.toFixed(5)} ${r.longitude.toFixed(5)} ${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}`;
+        return hay.includes(q.replace(/^#/, "")) || hay.includes(q);
+      })
+      .map((r, i) => ({ ...r, rank: i + 1 }));
+  }, [ranked, statusFilter, query]);
+
+  const kpis = useMemo(() => {
+    const open = ranked.filter((r) => r.status !== "repaired").length;
+    const inProgress = ranked.filter((r) => r.status === "in_progress").length;
+    const repaired = ranked.filter((r) => r.status === "repaired").length;
+    const high = ranked.filter(
+      (r) =>
+        r.status !== "repaired" &&
+        (r.live_priority_category === "Important" || r.live_priority_category === "Very Important")
+    ).length;
+    return { open, inProgress, repaired, high };
+  }, [ranked]);
+
+  const drawerRow = drawerId != null ? visible.find((r) => r.detection_id === drawerId) || ranked.find((r) => r.detection_id === drawerId) : null;
+
   async function handleStatusChange(detectionId, newStatus) {
     setUpdatingId(detectionId);
+    setError(null);
     try {
       await updateStatus(detectionId, newStatus);
-      await reload();
+      await reload({ silent: true });
+      setNotice(`Detection ${detectionId} marked as ${newStatus.replace("_", " ")}.`);
     } catch (err) {
       if (!handleUnauthorized(err)) {
         setError("Could not update status. Is the backend running?");
@@ -73,6 +148,12 @@ export default function AdminDashboard() {
       setUpdatingId(null);
     }
   }
+
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(null), 3500);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   async function handleDownloadPdf() {
     setDownloadingPdf(true);
@@ -93,192 +174,414 @@ export default function AdminDashboard() {
     navigate("/admin/login", { replace: true });
   }
 
-  const mapCenter = ranked.length > 0 ? [ranked[0].latitude, ranked[0].longitude] : DEFAULT_CENTER;
+  const openDrawer = useCallback((id) => {
+    setSelectedId(id);
+    setDrawerId(id);
+  }, []);
+  const closeDrawer = useCallback(() => setDrawerId(null), []);
 
-  const criticalCount = ranked.filter((item) => item.severity_category === "Critical").length;
-  const urgentCount = ranked.filter(
-    (item) => item.live_priority_category === "Important" || item.live_priority_category === "Very Important"
-  ).length;
+  // Marker click -> select + scroll the row into view.
+  const tableRef = useRef(null);
+  const selectFromMap = useCallback((id) => {
+    setSelectedId(id);
+    const el = tableRef.current?.querySelector(`[data-row-id="${id}"]`);
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, []);
 
+  const weightTotal = weights.alpha + weights.beta + weights.gamma + weights.delta;
+  const weightsChanged = WEIGHT_FIELDS.some((f) => weights[f.key] !== DEFAULT_WEIGHTS[f.key]);
   const username = getUsername() || "admin";
 
   return (
-    <div className="page admin-page">
-      <div className="admin-toolbar">
-        <div className="admin-toolbar-title">
-          <h1>Repair Worklist</h1>
-          {!loading && ranked.length > 0 && (
-            <div className="stat-row">
-              <span className="stat-pill">{ranked.length} report{ranked.length === 1 ? "" : "s"}</span>
-              <span className="stat-pill stat-pill-critical">{criticalCount} critical severity</span>
-              <span className="stat-pill stat-pill-urgent">{urgentCount} high priority</span>
-            </div>
-          )}
-        </div>
-        <div className="admin-user-menu">
-          <span className="admin-avatar">{username.charAt(0).toUpperCase()}</span>
-          <span className="admin-username">{username}</span>
-          <button className="ghost-button" onClick={handleLogout}>
-            Sign out
-          </button>
-        </div>
-      </div>
-
-      {error && <p className="error-text">{error}</p>}
-
-      <div className="admin-layout">
-        <aside className="admin-sidebar">
-          <section>
-            <h3>Priority weights</h3>
-            <p className="hint">Adjust to see the worklist re-rank instantly.</p>
-            <WeightSlider label="Pothole Severity" value={weights.alpha} onChange={(v) => setWeights({ ...weights, alpha: v })} />
-            <WeightSlider label="Road Importance" value={weights.beta} onChange={(v) => setWeights({ ...weights, beta: v })} />
-            <WeightSlider label="Traffic Level" value={weights.gamma} onChange={(v) => setWeights({ ...weights, gamma: v })} />
-            <WeightSlider label="Previous Reports" value={weights.delta} onChange={(v) => setWeights({ ...weights, delta: v })} />
-            <button className="secondary-button" onClick={() => setWeights(DEFAULT_WEIGHTS)}>Reset to default</button>
-          </section>
-
-          <section>
-            <h3>Filter</h3>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="">All statuses</option>
-              <option value="reported">Reported</option>
-              <option value="in_progress">In progress</option>
-              <option value="repaired">Repaired</option>
-            </select>
-          </section>
-
-          <button className="secondary-button pdf-link" onClick={handleDownloadPdf} disabled={downloadingPdf}>
-            {downloadingPdf ? (
+    <main className="page admin-page">
+      <header className="admin-head">
+        <div className="admin-head-text">
+          <p className="eyebrow">Admin console</p>
+          <h1 className="page-title">Repair worklist</h1>
+          <p className="admin-updated">
+            {lastUpdated ? (
               <>
-                <Spinner size="sm" /> Generating...
+                Updated <span className="num">{lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
               </>
             ) : (
-              "📄 Download PDF report"
+              "Loading…"
             )}
+            <button
+              type="button"
+              className="btn btn-link btn-sm"
+              onClick={() => reload({ silent: true })}
+              disabled={loading || refreshing}
+            >
+              <RefreshIcon size={14} className={refreshing ? "spin" : ""} /> Refresh
+            </button>
+          </p>
+        </div>
+        <div className="admin-head-actions">
+          <button type="button" className="btn btn-secondary" onClick={handleDownloadPdf} disabled={downloadingPdf}>
+            {downloadingPdf ? <Spinner size="sm" /> : <FileDownIcon size={16} />}
+            <span>{downloadingPdf ? "Generating…" : "Export PDF"}</span>
           </button>
+          <UserMenu username={username} onLogout={handleLogout} />
+        </div>
+      </header>
+
+      {error && (
+        <div className="alert alert-error alert-row" role="alert">
+          <AlertCircleIcon size={18} />
+          <span>{error}</span>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={() => reload()}>
+            <RefreshIcon size={14} /> Retry
+          </button>
+        </div>
+      )}
+
+      <section className="kpis" aria-label="Summary">
+        <Kpi label="Open reports" value={kpis.open} icon={<InboxIcon size={16} />} loading={loading} hint="Reported or in progress (not yet repaired)" />
+        <Kpi label="In progress" value={kpis.inProgress} icon={<WrenchIcon size={16} />} loading={loading} />
+        <Kpi label="Repaired" value={kpis.repaired} icon={<CheckCircleIcon size={16} />} loading={loading} />
+        <Kpi
+          label="High priority"
+          value={kpis.high}
+          icon={<FlagIcon size={16} />}
+          loading={loading}
+          emphasis={kpis.high > 0}
+          hint="Important + Very important, not yet repaired, under current weights"
+        />
+      </section>
+
+      <div className="admin-layout">
+        <aside className={`panel${panelOpen ? " is-open" : ""}`} aria-label="Filters and weights">
+          <button
+            type="button"
+            className="panel-toggle"
+            aria-expanded={panelOpen}
+            aria-controls="panel-body"
+            onClick={() => setPanelOpen((v) => !v)}
+          >
+            <SlidersIcon size={16} />
+            <span>Filters &amp; weights</span>
+            {(statusFilter || query || weightsChanged) && <span className="panel-toggle-dot" aria-label="active" />}
+            <ChevronDownIcon size={16} className="panel-toggle-chevron" />
+          </button>
+
+          <div id="panel-body" className="panel-body">
+            <section className="panel-section">
+              <h2 className="label-caps">Status</h2>
+              <div className="segmented" role="radiogroup" aria-label="Filter by status">
+                {STATUS_FILTERS.map((f) => (
+                  <button
+                    key={f.value || "all"}
+                    type="button"
+                    role="radio"
+                    aria-checked={statusFilter === f.value}
+                    className={`segmented-item${statusFilter === f.value ? " is-on" : ""}`}
+                    onClick={() => setStatusFilter(f.value)}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="panel-section">
+              <label className="label-caps" htmlFor="worklist-search">Search</label>
+              <div className="search">
+                <SearchIcon size={16} />
+                <input
+                  id="worklist-search"
+                  className="input input-sm"
+                  type="search"
+                  placeholder="Detection ID or coordinates"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+            </section>
+
+            <section className="panel-section">
+              <div className="panel-section-head">
+                <h2 className="label-caps">Priority weights</h2>
+                <button
+                  type="button"
+                  className="btn btn-link btn-sm"
+                  onClick={() => setWeights(DEFAULT_WEIGHTS)}
+                  disabled={!weightsChanged}
+                >
+                  Reset
+                </button>
+              </div>
+              <p className="muted small">Drag to re-rank the worklist instantly.</p>
+              <div className="share-bar" aria-hidden="true">
+                {WEIGHT_FIELDS.map((f) => (
+                  <span
+                    key={f.key}
+                    className={`share-seg seg-${f.key}`}
+                    style={{ width: `${weightTotal > 0 ? (100 * weights[f.key]) / weightTotal : 0}%` }}
+                  />
+                ))}
+              </div>
+              {WEIGHT_FIELDS.map((f) => (
+                <WeightSlider
+                  key={f.key}
+                  id={`w-${f.key}`}
+                  field={f}
+                  value={weights[f.key]}
+                  share={weightTotal > 0 ? weights[f.key] / weightTotal : 0}
+                  onChange={(v) => setWeights((w) => ({ ...w, [f.key]: v }))}
+                />
+              ))}
+              {weightTotal <= 0 && (
+                <p className="alert alert-warn small">
+                  <AlertTriangleIcon size={16} /> All weights are zero, so every priority is 0.
+                </p>
+              )}
+            </section>
+          </div>
         </aside>
 
-        <main className="admin-main">
-          <div className="map-wrap">
-            {loading && (
-              <div className="map-loading-overlay">
-                <Spinner label="Loading map data..." />
+        <div className="admin-main">
+          <WorklistMap rows={visible} selectedId={selectedId} onSelect={selectFromMap} loading={loading} />
+
+          <section className="card card-flush worklist" aria-labelledby="worklist-title">
+            <header className="worklist-head">
+              <h2 id="worklist-title" className="section-title">
+                Worklist <span className="count num">{loading ? "" : visible.length}</span>
+              </h2>
+              <span className="muted small">Ranked by priority · click a row for details</span>
+            </header>
+
+            {loading ? (
+              <div className="table-skeleton" aria-busy="true" aria-label="Loading worklist">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div className="skeleton-row" key={i}>
+                    <span className="skeleton-line tiny" />
+                    <span className="skeleton-line" />
+                    <span className="skeleton-line short" />
+                    <span className="skeleton-line" />
+                  </div>
+                ))}
+              </div>
+            ) : visible.length === 0 ? (
+              <div className="empty">
+                <span className="empty-icon"><InboxIcon size={24} strokeWidth={1.5} /></span>
+                {ranked.length === 0 ? (
+                  <>
+                    <p className="empty-title">No reports yet</p>
+                    <p className="muted small">Reports submitted from the public page will appear here, ranked by priority.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="empty-title">Nothing matches these filters</p>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setStatusFilter("");
+                        setQuery("");
+                      }}
+                    >
+                      Clear filters
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="table-scroll" ref={tableRef}>
+                <table className="worklist-table">
+                  <thead>
+                    <tr>
+                      <th scope="col" className="col-rank">#</th>
+                      <th scope="col">Priority</th>
+                      <th scope="col">Severity</th>
+                      <th scope="col">Location</th>
+                      <th scope="col">Reported</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visible.map((item) => {
+                      const isSel = item.detection_id === selectedId;
+                      return (
+                        <tr
+                          key={item.detection_id}
+                          data-row-id={item.detection_id}
+                          className={`${isSel ? "is-selected" : ""}${updatingId === item.detection_id ? " is-updating" : ""}`}
+                          tabIndex={0}
+                          aria-label={`Rank ${item.rank}, detection ${item.detection_id}, open details`}
+                          onClick={() => openDrawer(item.detection_id)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              openDrawer(item.detection_id);
+                            }
+                          }}
+                          onMouseEnter={() => setSelectedId(item.detection_id)}
+                        >
+                          <td className="col-rank num" data-label="Rank">{item.rank}</td>
+                          <td data-label="Priority">
+                            <div className="cell-priority">
+                              <ScoreBar
+                                score={item.live_priority_score}
+                                category={item.live_priority_category}
+                                kind="priority"
+                              />
+                              <span className="cell-cat">{item.live_priority_category}</span>
+                            </div>
+                          </td>
+                          <td data-label="Severity">
+                            <span className="cell-sev">
+                              <CategoryChip category={item.severity_category} size="sm" />
+                              <span className="muted num">{Math.round(item.severity_score)}</span>
+                            </span>
+                          </td>
+                          <td data-label="Location">
+                            <span className="cell-loc">
+                              <span className="num">
+                                {item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}
+                              </span>
+                              <a
+                                href={osmUrl(item.latitude, item.longitude)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="icon-link"
+                                aria-label="Open in OpenStreetMap"
+                                title="Open in OpenStreetMap"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ExternalLinkIcon size={14} />
+                              </a>
+                            </span>
+                          </td>
+                          <td data-label="Reported">
+                            <time dateTime={item.submitted_at} title={fullDate(item.submitted_at)}>
+                              {relativeTime(item.submitted_at)}
+                            </time>
+                          </td>
+                          <td data-label="Status" className="cell-status">
+                            <StatusSelect
+                              value={item.status}
+                              disabled={updatingId === item.detection_id}
+                              onChange={(s) => handleStatusChange(item.detection_id, s)}
+                              label={`Status for detection ${item.detection_id}`}
+                            />
+                            {updatingId === item.detection_id && <Spinner size="sm" />}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
-            <MapContainer center={mapCenter} zoom={12} style={{ height: "100%", width: "100%" }}>
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="&copy; OpenStreetMap contributors"
-              />
-              {ranked.map((item) => (
-                <CircleMarker
-                  key={item.detection_id}
-                  center={[item.latitude, item.longitude]}
-                  radius={8}
-                  pathOptions={{ color: priorityColor(item.live_priority_category), fillOpacity: 0.8 }}
-                >
-                  <Popup>
-                    <strong>Detection #{item.detection_id}</strong>
-                    <br />
-                    Severity: {item.severity_category} ({Math.round(item.severity_score)})
-                    <br />
-                    Priority: {item.live_priority_category} ({Math.round(item.live_priority_score)})
-                    <br />
-                    Status: {item.status}
-                  </Popup>
-                </CircleMarker>
-              ))}
-            </MapContainer>
-          </div>
-
-          {loading ? (
-            <div className="table-skeleton">
-              {[0, 1, 2, 3].map((i) => (
-                <div className="skeleton-row" key={i} />
-              ))}
-            </div>
-          ) : (
-            <div className="table-scroll">
-              <table className="worklist-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Severity</th>
-                    <th>Priority</th>
-                    <th>Location</th>
-                    <th>Reported</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ranked.map((item, i) => (
-                    <tr key={item.detection_id} className={updatingId === item.detection_id ? "row-updating" : ""}>
-                      <td>{i + 1}</td>
-                      <td><ScoreBadge label={item.severity_category} colorFn={severityColor} /></td>
-                      <td>
-                        <ScoreBadge label={item.live_priority_category} colorFn={priorityColor} />{" "}
-                        {Math.round(item.live_priority_score)}
-                      </td>
-                      <td>
-                        <div className="location-cell">
-                          <span>{item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}</span>
-                          <button
-                            type="button"
-                            className="ghost-button small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(`https://www.openstreetmap.org/?mlat=${item.latitude}&mlon=${item.longitude}&zoom=16`, "_blank");
-                            }}
-                          >
-                            View on Map
-                          </button>
-                        </div>
-                      </td>
-                      <td>{new Date(item.submitted_at).toLocaleDateString()}</td>
-                      <td className="status-cell">
-                        <select
-                          value={item.status}
-                          disabled={updatingId === item.detection_id}
-                          onChange={(e) => handleStatusChange(item.detection_id, e.target.value)}
-                        >
-                          <option value="reported">Reported</option>
-                          <option value="in_progress">In progress</option>
-                          <option value="repaired">Repaired</option>
-                        </select>
-                        {updatingId === item.detection_id && <Spinner size="sm" />}
-                      </td>
-                    </tr>
-                  ))}
-                  {ranked.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="empty-row">No reports yet — submit one from the citizen upload page.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </main>
+          </section>
+        </div>
       </div>
+
+      <div className="toast-region" aria-live="polite">
+        {notice && (
+          <div className="toast">
+            <CheckCircleIcon size={16} /> {notice}
+          </div>
+        )}
+      </div>
+
+      {drawerRow && (
+        <DetailDrawer
+          row={drawerRow}
+          weights={weights}
+          onClose={closeDrawer}
+          onStatusChange={handleStatusChange}
+          updating={updatingId === drawerRow.detection_id}
+          onUnauthorized={handleUnauthorized}
+        />
+      )}
+    </main>
+  );
+}
+
+function Kpi({ label, value, icon, loading, emphasis, hint }) {
+  return (
+    <div className={`kpi${emphasis ? " is-emphasis" : ""}`} title={hint}>
+      <span className="kpi-label">
+        {icon}
+        {label}
+      </span>
+      {loading ? <span className="skeleton-line kpi-skel" /> : <span className="kpi-value num">{value}</span>}
     </div>
   );
 }
 
-function WeightSlider({ label, value, onChange }) {
+function WeightSlider({ id, field, value, share, onChange }) {
   return (
-    <div className="weight-slider">
-      <label>
-        {label}: {value.toFixed(2)}
-      </label>
+    <div className="weight">
+      <div className="weight-head">
+        <label htmlFor={id} className="weight-label">
+          <span className={`weight-swatch seg-${field.key}`} aria-hidden="true" />
+          {field.label}
+        </label>
+        <span className="weight-value num">{value.toFixed(2)}</span>
+        <span className="weight-share num">{Math.round(share * 100)}%</span>
+      </div>
       <input
+        id={id}
+        className="range"
         type="range"
         min="0"
         max="1"
         step="0.05"
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
+        style={{ "--fill": `${value * 100}%` }}
+        aria-describedby={`${id}-hint`}
       />
+      <span id={`${id}-hint`} className="weight-hint">{field.hint}</span>
+    </div>
+  );
+}
+
+function UserMenu({ username, onLogout }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => {
+      if (!ref.current?.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="user-menu" ref={ref}>
+      <button
+        type="button"
+        className="user-menu-btn"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="avatar" aria-hidden="true">{username.charAt(0).toUpperCase()}</span>
+        <span className="user-name">{username}</span>
+        <ChevronDownIcon size={14} />
+      </button>
+      {open && (
+        <div className="menu" role="menu">
+          <div className="menu-meta">
+            Signed in as <strong>{username}</strong>
+          </div>
+          <button type="button" role="menuitem" className="menu-item" onClick={onLogout}>
+            <LogOutIcon size={16} /> Sign out
+          </button>
+        </div>
+      )}
     </div>
   );
 }

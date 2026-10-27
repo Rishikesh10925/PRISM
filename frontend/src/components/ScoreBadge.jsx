@@ -1,40 +1,36 @@
-const SEVERITY_COLORS = {
-  "Very Low": "#2e7d32",
-  Low: "#66bb6a",
-  Medium: "#f9a825",
-  High: "#ef6c00",
-  Critical: "#c62828",
-};
+import { priorityTone, severityTone } from "../scoring";
 
-const PRIORITY_COLORS = {
-  "Less Important": "#2e7d32",
-  Moderate: "#f9a825",
-  Important: "#ef6c00",
-  "Very Important": "#c62828",
-};
-
-export function severityColor(category) {
-  return SEVERITY_COLORS[category] || "#666";
-}
-
-export function priorityColor(category) {
-  return PRIORITY_COLORS[category] || "#666";
-}
-
-export default function ScoreBadge({ label, colorFn }) {
+// Subtle tinted chip with a coloured dot. Strong colour is reserved (via CSS) for the
+// high/crit tones so a worklist full of low-severity rows stays calm.
+export function CategoryChip({ category, kind = "severity", size = "md" }) {
+  const tone = kind === "priority" ? priorityTone(category) : severityTone(category);
   return (
-    <span
-      style={{
-        backgroundColor: colorFn(label),
-        color: "white",
-        padding: "4px 12px",
-        borderRadius: 12,
-        fontWeight: 600,
-        fontSize: "0.85rem",
-        display: "inline-block",
-      }}
-    >
-      {label}
+    <span className={`chip chip-${size} tone-${tone}`}>
+      <span className="chip-dot" aria-hidden="true" />
+      {category || "Unscored"}
     </span>
   );
 }
+
+// Compact 0-100 bar with the numeric score in tabular figures.
+export function ScoreBar({ score, category, kind = "severity", showValue = true, label }) {
+  const tone = kind === "priority" ? priorityTone(category) : severityTone(category);
+  const value = Number.isFinite(score) ? Math.max(0, Math.min(100, score)) : 0;
+  return (
+    <span className={`score-bar tone-${tone}`}>
+      {showValue && <span className="score-bar-value num">{Math.round(value)}</span>}
+      <span
+        className="score-bar-track"
+        role="meter"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(value)}
+        aria-label={label || `${kind === "priority" ? "Priority" : "Severity"} score`}
+      >
+        <span className="score-bar-fill" style={{ width: `${value}%` }} />
+      </span>
+    </span>
+  );
+}
+
+export default CategoryChip;

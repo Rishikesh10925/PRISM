@@ -47,6 +47,19 @@ export async function updateStatus(detectionId, status) {
   return data;
 }
 
+// Admin detail view: one detection with its scores and parent report summary.
+export async function fetchPothole(detectionId) {
+  const { data } = await client.get(`/potholes/${detectionId}`);
+  return data;
+}
+
+// The stored report photo. It needs the bearer token, so it can't be an <img src> URL;
+// returns a Blob for the caller to wrap in an object URL (and revoke).
+export async function fetchReportImage(reportId) {
+  const { data } = await client.get(`/reports/${reportId}/image`, { responseType: "blob" });
+  return data;
+}
+
 export async function downloadPdfReport() {
   const response = await client.get("/report/pdf", { responseType: "blob" });
   const url = URL.createObjectURL(response.data);
