@@ -65,3 +65,6 @@ data/severity_val_subset/severity_rating.html
 # Generated logs (training runs, dev servers) and Office lock files
 *.log
 ~$*.pptx
+
+# private paper work (not pushed)
+paper/
