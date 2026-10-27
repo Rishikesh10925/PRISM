@@ -9,11 +9,6 @@ Full plans:
 - [docs/Pothole_Project_Full_WorkPlan.docx](docs/Pothole_Project_Full_WorkPlan.docx) — phase-by-phase task plan
 - [docs/phase1/](docs/phase1/) — Phase 1 (literature review & planning) deliverables
 
-## Project layout
-
-```
-
-
 ## Status
 
 **Latest: reliability audit and fixes (October 2026)** — see
