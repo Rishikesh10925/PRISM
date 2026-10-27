@@ -57,3 +57,11 @@ src/**/*.pt
 
 # severity rating page embeds dataset images (unclear licenses) -- rebuild with build_severity_rating.py
 data/severity_val_subset/severity_rating.html
+
+# Computer Vision project presentation and template
+/NMIMS ppt template.pptx
+/CV_Project_Presentation.pptx
+
+# Generated logs (training runs, dev servers) and Office lock files
+*.log
+~$*.pptx
