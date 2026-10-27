@@ -136,3 +136,49 @@ def test_production_refuses_to_start_with_dev_secrets():
 def test_production_starts_with_real_secrets():
     result = _import_config(APP_ENV="production", JWT_SECRET="x" * 40, ADMIN_PASSWORD_HASH="$2b$12$" + "a" * 53)
     assert result.returncode == 0, result.stderr
+
+
+# --- photo orientation ------------------------------------------------------------
+
+
+def _rotated_phone_jpeg(width=60, height=40, orientation=6):
+    """A JPEG stored landscape but tagged 'rotate 90 degrees' -- how phones save portrait shots."""
+    exif = Image.Exif()
+    exif[0x0112] = orientation
+    buf = io.BytesIO()
+    Image.new("RGB", (width, height), (90, 90, 90)).save(buf, format="JPEG", exif=exif)
+    return buf.getvalue()
+
+
+def test_upright_image_bytes_applies_exif_rotation():
+    from app.services.uploads import upright_image_bytes
+
+    data = _rotated_phone_jpeg()
+    upright = Image.open(io.BytesIO(upright_image_bytes(Image.open(io.BytesIO(data)), data)))
+    assert upright.size == (40, 60)
+    assert upright.getexif().get(0x0112, 1) == 1
+
+
+def test_upright_image_bytes_leaves_untagged_photos_untouched():
+    from app.services.uploads import upright_image_bytes
+
+    data = _image_bytes(fmt="JPEG", size=(60, 40))
+    assert upright_image_bytes(Image.open(io.BytesIO(data)), data) is data
+
+
+def test_rotated_phone_photo_is_analysed_and_stored_upright(client, monkeypatch, upload_dir):
+    from app.routers import reports
+
+    seen = {}
+
+    def fake_analyze(image_bgr, *args, **kwargs):
+        seen["shape"] = image_bgr.shape
+        return [], 0.4, "osm", 0.2
+
+    monkeypatch.setattr(reports, "analyze_report_image", fake_analyze)
+    resp = _post(client, _rotated_phone_jpeg())
+
+    assert resp.status_code == 200, resp.text
+    assert seen["shape"][:2] == (60, 40)  # height x width: upright portrait
+    stored = Image.open(next(upload_dir.iterdir()))
+    assert stored.size == (40, 60)

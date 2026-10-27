@@ -27,7 +27,13 @@ from app.database import get_db
 from app.models import Detection, PriorityScoreRecord, RepairStatus, Report, SeverityScore
 from app.schemas import ReportOut
 from app.services.inference import analyze_report_image
-from app.services.uploads import UploadRejected, exif_capture_hour, safe_stored_name, validate_image_bytes
+from app.services.uploads import (
+    UploadRejected,
+    exif_capture_hour,
+    safe_stored_name,
+    upright_image_bytes,
+    validate_image_bytes,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +84,8 @@ def create_report(
     if report_hour is None:
         report_hour = datetime.now().hour
 
+    # rotate phone photos upright once; the analysed and the stored image are then the same
+    image_bytes = upright_image_bytes(pil_image, image_bytes)
     image_bgr = cv2.imdecode(np.frombuffer(image_bytes, dtype=np.uint8), cv2.IMREAD_COLOR)
     if image_bgr is None:
         raise HTTPException(status_code=422, detail="could not decode image")

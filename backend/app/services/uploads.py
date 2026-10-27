@@ -11,7 +11,7 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 ALLOWED_FORMATS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}  # Pillow format -> stored extension
 MIN_IMAGE_SIDE = 32  # px -- nothing smaller can contain a usable pothole
@@ -84,3 +84,23 @@ def exif_capture_hour(img: Image.Image, now: datetime | None = None) -> int | No
     if taken.year < 2000 or taken > now + timedelta(days=1):
         return None
     return taken.hour
+
+
+EXIF_ORIENTATION = 0x0112
+
+
+def upright_image_bytes(img: Image.Image, image_bytes: bytes) -> bytes:
+    """The upload re-encoded upright if its EXIF Orientation tag says it's rotated or
+    mirrored (common for phone photos), else the original bytes unchanged.
+
+    OpenCV ignores the tag, so without this the model would analyse a sideways image and
+    the stored mask polygons wouldn't match the photo browsers display (which honour the
+    tag). Analysis and storage both use the returned bytes, so they always agree."""
+    if img.getexif().get(EXIF_ORIENTATION, 1) in (0, 1):
+        return image_bytes
+    upright = ImageOps.exif_transpose(img)
+    if img.format == "JPEG" and upright.mode not in ("RGB", "L"):
+        upright = upright.convert("RGB")
+    out = io.BytesIO()
+    upright.save(out, format=img.format, **({"quality": 95} if img.format in ("JPEG", "WEBP") else {}))
+    return out.getvalue()
